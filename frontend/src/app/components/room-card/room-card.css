@@ -1,0 +1,82 @@
+.room-card #room-image-container {
+    height: 200px;
+    overflow: hidden;
+}
+
+.room-card #room-image-container img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.room-detail{
+    padding: 5px 20px 15px 20px;
+    background-color: white;
+    border-radius: 0 0 12px 12px;
+}
+
+.room-detail p{
+    color: #74796F;
+    font-size: 0.8rem;
+}
+
+#listing-room-type{
+    margin-bottom: 5px;
+}
+
+.room-rating-reviews{
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#room-rating{
+    background-color: #dedede;
+    padding: 7px;
+    border-radius: 4px;
+    font-weight: bold;
+    color: #4f4f4f;
+}
+
+.divider{
+    border: 1px solid #E2E5DD;
+    margin: 0 0 15px 0;
+}
+
+.bottom-row-details{
+    display: flex;
+    justify-content: space-between;
+}
+
+#price-container{
+    font-weight: bold;
+    font-size: 1.25rem;
+    color: #252B25;
+}
+
+#view-details-container{
+    display: flex;
+    align-items: center;
+}
+
+#view-details-btn{
+    background-color: #52634B;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: white;
+    padding: 15px;
+    font-weight: bold;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#view-details-btn:hover{
+    background-color: #384732;
+}
+
+#listing-room-type, #room-description, .room-rating-reviews, #room-amenities, #room-pricing p{
+    background-color: #dedede;
+}
