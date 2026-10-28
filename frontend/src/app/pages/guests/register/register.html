@@ -1,0 +1,65 @@
+<div class="register-container">
+  <header>
+    <img style="width:90px; padding: 10px 0;" src="haven-full-logo.png" alt="Logo">
+    <p>Log in to start booking!</p>
+  </header>
+
+  <div class="main-section">
+    <div id="login-container">
+      <p style="font-weight: bold; font-size: 0.70rem; color:#52634B">GUEST ACCOUNT</p>
+      <h1 style="margin: 15px 0;">Make yourself at home.</h1>
+      <p style="font-size: 0.9rem; color:#74796F;">Create an account to book and manage your stays.</p>
+
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+
+        <!-- First Name and Last Name -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="first-name">First Name</label>
+            <input type="text" id="first-name" formControlName="firstName" placeholder="Enter first name">
+          </div>
+          <div class="form-group">
+            <label for="last-name">Last Name</label>
+            <input type="text" id="last-name" formControlName="lastName" placeholder="Enter last name">
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" formControlName="email" placeholder="Enter email">
+          <small class="hint">Enter a valid email address that is not already registered.</small>
+        </div>
+
+        <!-- Phone Number -->
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="text" id="phone" formControlName="phone" placeholder="Enter phone number">
+          <small class="hint">Include your country code.</small>
+        </div>
+
+        <!-- Password -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" formControlName="password" placeholder="Enter password">
+          </div>
+          <div class="form-group">
+            <label for="confirm-password">Confirm Password</label>
+            <input type="password" id="confirm-password" formControlName="confirmPassword" placeholder="Confirm password">
+          </div>
+        </div>
+
+        <small class="hint">All fields are required. Use at least 8 characters for your password. Both passwords must match before you can create your account.</small>
+
+        <br>
+        
+        <button type="submit" [disabled]="registerForm.invalid">Create guest account</button>
+      </form>
+
+      <div class="login-link">
+        <p style="color:#74796F;">Already have an account? <a href="/">Sign in</a></p> 
+      </div>
+    </div>
+  </div>
+</div>

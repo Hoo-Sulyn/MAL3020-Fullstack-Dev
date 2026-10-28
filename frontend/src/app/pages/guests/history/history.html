@@ -1,0 +1,100 @@
+<div id="history-container">
+    <h1>Your stays at haven</h1>
+    <small>Your current, past and cancelled bookings, all in one place.</small>
+
+    <p><span id="guest-name">Guest name</span> • Guest account • As of <span id="date-acc-creation">Oct 15, 2026</span></p>
+
+    <div class="main-container">
+        <div id="booking-history-container">
+            <div class="booking-history-cards" id="current-bookings">
+                <h2>Current & upcoming • <span id="current-bookings-count">0</span></h2>
+
+                <div class="booking-details-card">
+                    <div class="booking-details">
+                        <p id="room-details"><span id="room-num">101</span> • <span id="room-name">Room name</span></p>
+                        <small id="booking-id">HV-0000</small>
+                    </div>
+
+                    <div class="booking-details">
+                        <p id="booking-dates">Oct 15-19, 2026</p>
+                        <small><span id="number-of-nights">1 night</span> • <span id="num-of-guests">1 guest</span></small>
+                    </div>
+
+                    <div class="booking-details">
+                        <p id="booking-status">Checked in</p>
+                        <small id="booking-price">RM <span id="total-price">0</span></small>
+                    </div>
+
+                    <div class="booking-details" id="booking-action">Ongoing stay</div>
+                </div>
+
+            </div>
+
+            <div class="booking-history-cards" id="past-bookings">
+                <h2>Past • <span id="past-bookings-count">0</span></h2>
+
+                <div class="booking-details-card">
+                    <div class="booking-details">
+                        <p id="room-details"><span id="room-num">101</span> • <span id="room-name">Room name</span></p>
+                        <small id="booking-id">HV-0000</small>
+                    </div>
+
+                    <div class="booking-details">
+                        <p id="booking-dates">Oct 15-19, 2026</p>
+                        <small><span id="number-of-nights">1 night</span> • <span id="num-of-guests">1 guest</span></small>
+                    </div>
+
+                    <div class="booking-details">
+                        <p id="booking-status">Checked out</p>
+                        <small id="booking-price">RM <span id="total-price">0</span></small>
+                    </div>
+
+                    <div class="booking-details" id="booking-action">Completed stay</div>
+                </div>
+            </div>
+
+            <div class="booking-history-cards" id="past-bookings">
+                <h2>Cancelled • <span id="past-bookings-count">0</span></h2>
+
+                <div class="booking-details-card">
+                    <div class="booking-details">
+                        <p id="room-details"><span id="room-num">101</span> • <span id="room-name">Room name</span></p>
+                        <small id="booking-id">HV-0000</small>
+                    </div>
+
+                    <div class="booking-details">
+                        <p id="booking-dates">Oct 15-19, 2026</p>
+                        <small><span id="number-of-nights">1 night</span> • <span id="num-of-guests">1 guest</span></small>
+                    </div>
+
+                    <div class="booking-details">
+                        <p id="booking-status">Cancelled</p>
+                        <small id="booking-price">RM <span id="total-price">0</span></small>
+                    </div>
+
+                    <div class="booking-details" id="booking-action">Cancelled</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="confirmation-container">
+            <div class="cancel-booking-container">
+                <small id="highlighted-note">Cancellation confirmation</small>
+                <h3>Cancel this booking?</h3>
+                <small id="room-booking-desc">Room booking description</small>
+
+                <div class="divider"></div>
+
+                <p id="cancellation-warning">Your room will be released and this booking will move to Cancelled. This action cannot be undone.</p>
+
+                <button type="onclick" id="keep-booking-btn">Keep booking</button><br>
+                <button type="onclick" id="cancel-booking-btn">Yes, cancel booking</button>
+            </div>
+
+            <div class="cancellation-note">
+                <p id="note-header">Before your stay</p>
+                <small id="note-desc">You can cancel a confirmed booking before check-in. An ongoing or completed stay cannot be cancelled here.</small>
+            </div>
+        </div>
+    </div>
+</div>

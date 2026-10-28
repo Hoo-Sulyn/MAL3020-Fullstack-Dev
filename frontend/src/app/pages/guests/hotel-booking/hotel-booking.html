@@ -1,0 +1,140 @@
+<div id="booking-container">
+  <div class="main-container">
+    <h1>Available rooms at haven</h1>
+    <p style="font-size: 0.9rem; padding-bottom: 10px;">Browse rooms for your chosen dates. Live availability updates are shown as you browse.</p>
+
+    <form [formGroup]="searchForm" (ngSubmit)="onSubmit()">
+
+        <!-- Check in -->
+        <div class="search-field">
+            <img src="calendar-icon.png" alt="Calendar icon">
+            <div class="field-container">
+                <label for="check-in">Check-in</label>
+                <input type="date" id="check-in" formControlName="check-in">
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Check out -->
+        <div class="search-field">
+            <img src="calendar-icon.png" alt="Calendar icon">
+            <div class="field-container">
+                <label for="check-out">Check-out</label>
+                <input type="date" id="check-out" formControlName="check-out">
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Num guests & room -->
+        <div class="dropdown-container" (click)="$event.stopPropagation()">
+            <button
+                type="button"
+                id="dropdown-btn"
+                aria-haspopup="dialog"
+                [attr.aria-expanded]="occupancyDropdownOpen"
+                (click)="toggleOccupancyDropdown()">
+                <img src="two-users-icon.png" alt="">
+                <span class="occupancy-trigger-copy">
+                    <span class="occupancy-trigger-label">Guests</span>
+                    <span class="occupancy-trigger-summary">
+                        {{ adults }} {{ adults === 1 ? 'adult' : 'adults' }} ·
+                        {{ children }} {{ children === 1 ? 'child' : 'children' }} ·
+                        {{ rooms }} {{ rooms === 1 ? 'room' : 'rooms' }}
+                    </span>
+                </span>
+                <span class="dropdown-chevron" [class.is-open]="occupancyDropdownOpen" aria-hidden="true"></span>
+            </button>
+            <div
+                *ngIf="occupancyDropdownOpen"
+                id="dropdown-contents"
+                role="dialog"
+                aria-label="Guests, rooms, and preferences">
+                <div class="occupancy-row">
+                    <label for="adults-count">Adults</label>
+                    <div class="counter-control">
+                        <button type="button" aria-label="Decrease adults" [disabled]="adults <= 1" (click)="decreaseCount('adults')">−</button>
+                        <output id="adults-count">{{ adults }}</output>
+                        <button type="button" aria-label="Increase adults" (click)="increaseCount('adults')">+</button>
+                    </div>
+                </div>
+
+                <div class="occupancy-row">
+                    <label for="children-count">Children</label>
+                    <div class="counter-control">
+                        <button type="button" aria-label="Decrease children" [disabled]="children <= 0" (click)="decreaseCount('children')">−</button>
+                        <output id="children-count">{{ children }}</output>
+                        <button type="button" aria-label="Increase children" (click)="increaseCount('children')">+</button>
+                    </div>
+                </div>
+
+                <div class="occupancy-row">
+                    <label for="rooms-count">Rooms</label>
+                    <div class="counter-control">
+                        <button type="button" aria-label="Decrease rooms" [disabled]="rooms <= 1" (click)="decreaseCount('rooms')">−</button>
+                        <output id="rooms-count">{{ rooms }}</output>
+                        <button type="button" aria-label="Increase rooms" (click)="increaseCount('rooms')">+</button>
+                    </div>
+                </div>
+
+                <div class="dropdown-divider"></div>
+
+                <div class="preference-row">
+                    <span>Traveling with pets?</span>
+                    <button
+                        type="button"
+                        class="toggle-switch"
+                        role="switch"
+                        aria-label="Traveling with pets"
+                        [attr.aria-checked]="travelingWithPets"
+                        [class.is-active]="travelingWithPets"
+                        (click)="travelingWithPets = !travelingWithPets">
+                        <span></span>
+                    </button>
+                </div>
+
+                <button type="button" class="done-button" (click)="closeOccupancyDropdown()">Done</button>
+            </div>
+        </div>
+
+        <!-- Search button -->
+        <button type="submit" class="search-button">
+            <img src="search-icon.png" alt="Search icon">
+            <p style="font-size:0.85rem; color:white; margin:0;">Search</p>
+        </button>
+    </form>
+
+    <!-- Filter Dropdown -->
+    <div class="filter-container">
+        <select name="room-type" id="room-type">
+            <option name="room-type" hidden>Room type</option>
+            <option name="superior-king">Superior King</option>
+            <option name="garden-suite">Garden Suite</option>
+            <option name="river-view-double">River View Double</option>
+        </select>
+
+        <select name="guest-rating" id="guest-rating">
+            <option name="guest-rating" hidden>Guest rating</option>
+            <option name="exceptional">Exceptional (9.0+)</option>
+            <option name="wonderful">Wonderful (8.0+)</option>
+            <option name="very-good">Very Good (7.0+)</option>
+            <option name="pleasant">Pleasant (6.0+)</option>
+        </select>
+
+        <button type="button" id="available-button">Available only <span id="available-check" style="display:none;">✓</span></button>
+    </div>
+
+    <h2 style="color: #252B25;">
+        Rooms at haven 
+        <span id="rooms-available-note">
+            <span id="num-rooms-available">0</span>
+             rooms available for
+            <span id="booking-date">Jan 1-2</span>
+        </span>
+    </h2>
+
+    <!-- Room Listing Area -->
+    <div class="rooms-listing"></div>
+  </div>
+</div>

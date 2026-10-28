@@ -1,0 +1,179 @@
+#history-container{
+    padding: 20px 50px;
+    color: #252634;
+    /* margin-bottom: 40px; */
+}
+
+#history-container > small{
+    color: #74796F;
+    font-size: 0.9rem;
+}
+
+#history-container > p{
+    color: #74796F;
+    font-size: 0.8rem;
+    margin: 25px 0;
+}
+
+.main-container{
+    display: flex;
+    gap: 30px;
+}
+
+#booking-history-container{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex: 3;
+}
+
+.booking-history-cards{
+    border: 1px solid #E2E5DD;
+    border-radius: 12px;
+    background-color: white;
+    padding: 25px;
+}
+
+.booking-history-cards h2{
+    margin: 0;
+}
+
+.booking-details-card{
+    display: flex;
+    gap: 50px;
+    justify-content: space-between;
+    margin: 20px 0;
+}
+
+.booking-details{
+    align-self: center;
+    width: 100%;
+    flex: 2;
+}
+
+.booking-details > p{
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+#room-details{
+    font-size: 0.95rem;
+    color: black;
+}
+
+.booking-details > small{
+    color: #74796F;
+    font-size: 0.8rem;
+}
+
+#booking-status{
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background-color: #EDF1E9;
+    color: #52634B;
+    width: fit-content;
+    padding: 10px 15px;
+}
+
+#booking-price{
+    font-size: 1rem;
+    font-weight: bold;
+    color: #252634;
+}
+
+#booking-action{
+    color: #74796F;
+    font-size: 0.9rem;
+    flex: 1;
+}
+
+#confirmation-container{
+    display: flex;  /* to show, change to flex */
+    flex-direction: column;
+    flex: 1;
+    gap: 20px;
+}
+
+.cancel-booking-container{
+    border: 1px solid #E2E5DD;
+    border-radius: 12px;
+    background-color: white;
+    padding: 25px;
+}
+
+#highlighted-note{
+    background-color: #FBF3F1;
+    color: #9B5149;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+.cancel-booking-container h3{
+    margin: 25px 0;
+}
+
+.divider{
+    border: 1px solid #E2E5DD;
+    margin: 25px 0;
+}
+
+#cancellation-warning{
+    font-size: 0.8rem;
+    color: #74796F;
+}
+
+#keep-booking-btn{
+    border: 1px solid #E2E5DD;
+    border-radius: 8px;
+    color: #252634;
+    font-size: 0.8rem;
+    font-weight: bold;
+    background-color: white;
+    padding: 10px;
+    margin: 15px 0;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#keep-booking-btn:hover{
+    background-color: #E2E5DD;
+}
+
+#cancel-booking-btn{
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: bold;
+    background-color: #9B5149;
+    padding: 10px;
+    margin: 5px 0;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#cancel-booking-btn:hover{
+    background-color: red;
+}
+
+.cancellation-note{
+    background-color: #EDF1E9;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+#note-header{
+    margin: 5px 0;
+    color: #52634B;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+#note-desc{
+    margin: 5px 0;
+    color: #252634;
+    font-size: 0.75rem;
+}

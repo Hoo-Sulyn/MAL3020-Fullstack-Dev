@@ -1,0 +1,413 @@
+#confirm-booking-container{
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    gap: 20px;
+}
+
+.main-container{
+    padding: 20px 50px;
+    margin-bottom: 40px;
+}
+
+#back-to-room-details{
+    color: #52634B;
+    font-size: 0.8rem;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#title{
+    margin: 30px 0;
+}
+
+#title small{
+    color: #52634B;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+#title h1{
+    margin: 10px 0;
+}
+
+#title p{
+    color: #74796F;
+    font-size: 0.85rem;
+}
+
+#forms-container{
+    display: flex;
+    gap: 40px;
+}
+
+#stay-guest-details-container{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex: 3;
+}
+
+#stay-details{
+    border: 1px solid #E2E5DD;
+    border-radius: 12px;
+    padding: 25px;
+    background-color: white;
+}
+
+#stay-details h2, #guest-details h2{
+    margin: 0 0 20px 0;
+}
+
+#stay-details-form{
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+#stay-details-form > label{
+    display: block;
+    margin: 14px 0 6px;
+}
+
+.stay-fields{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.stay-fields label{
+    color: #252B25;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.stay-fields input[type="date"]{
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #D4D4D4;
+    border-radius: 6px;
+    padding: 11px 12px;
+    color: #252B25;
+    font: inherit;
+    font-size: 0.9rem;
+}
+
+.dropdown-container{
+    position: relative;
+}
+
+#dropdown-btn{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    min-height: 48px;
+    border: 1px solid #D4D4D4;
+    border-radius: 6px;
+    padding: 10px 12px;
+    background: white;
+    color: #252B25;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.occupancy-trigger-summary{
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.dropdown-chevron{
+    width: 8px;
+    height: 8px;
+    flex: 0 0 auto;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg) translateY(-2px);
+    transition: transform 0.2s ease;
+}
+
+.dropdown-chevron.is-open{
+    transform: rotate(225deg) translate(-2px, -1px);
+}
+
+#dropdown-contents{
+    position: absolute;
+    z-index: 5;
+    top: calc(100% + 8px);
+    left: 0;
+    width: min(420px, calc(100vw - 40px));
+    box-sizing: border-box;
+    padding: 24px;
+    border: 1px solid #E2E5DD;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.occupancy-row{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 57px;
+}
+
+.occupancy-row > label{
+    color: #252B25;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.counter-control{
+    display: grid;
+    grid-template-columns: 44px 48px 44px;
+    align-items: center;
+    height: 44px;
+    border: 1px solid #D4D4D4;
+    border-radius: 6px;
+}
+
+.counter-control button{
+    height: 100%;
+    border: 0;
+    background: transparent;
+    color: #52634B;
+    font-size: 1.25rem;
+    cursor: pointer;
+}
+
+.counter-control button:disabled{
+    color: #B8B8B8;
+    cursor: not-allowed;
+}
+
+.counter-control output{
+    text-align: center;
+    color: #252B25;
+}
+
+.dropdown-divider{
+    margin: 16px 0;
+    border-top: 1px solid #E2E5DD;
+}
+
+.preference-row{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: #252B25;
+    font-size: 0.9rem;
+}
+
+.toggle-switch{
+    display: flex;
+    align-items: center;
+    width: 46px;
+    height: 26px;
+    flex: 0 0 auto;
+    padding: 3px;
+    border: 0;
+    border-radius: 20px;
+    background: #888;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.toggle-switch span{
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: white;
+    transition: transform 0.2s ease;
+}
+
+.toggle-switch.is-active{
+    background: #52634B;
+}
+
+.toggle-switch.is-active span{
+    transform: translateX(20px);
+}
+
+.done-button{
+    width: 100%;
+    margin-top: 20px;
+    padding: 11px 16px;
+    border: 1px solid #52634B;
+    border-radius: 6px;
+    background: #52634B;
+    color: white;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.done-button:hover{
+    background: #374432;
+}
+
+#dropdown-btn:focus-visible,
+.counter-control button:focus-visible,
+.toggle-switch:focus-visible,
+.done-button:focus-visible{
+    outline: 2px solid #52634B;
+    outline-offset: 2px;
+}
+
+#guest-details{
+    border: 1px solid #E2E5DD;
+    border-radius: 12px;
+    padding: 25px;
+    background-color: white;
+}
+
+#guest-detail-info{
+    display: flex;
+    justify-content: space-between;
+}
+
+#guest-name-email-number{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#guest-name{
+    margin: 0;
+    color: #252B25;
+}
+
+#guest-email-number{
+    color: #74796F;
+    font-size: 0.85rem;
+}
+
+#edit-profile-link{
+    color: #52634B;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.note{
+    margin: 25px 0 0 0;
+    color: #74796F;
+    font-size: 0.75rem;
+}
+
+#date-availability-feedback{
+    padding: 15px;
+    border: 1px solid #f5d2c9;
+    border-radius: 8px;
+    background-color: #FBF3F1;
+}
+
+#feedback-title{
+    margin: 0 0 10px 0;
+    color: #9B5149;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+#feedback-content{
+    font-size: 0.8rem;
+}
+
+#booking-summary-container{
+    border: 1px solid #E2E5DD;
+    border-radius: 12px;
+    padding: 25px;
+    background-color: white;
+    flex: 1;
+    height: fit-content;
+    align-self: center;
+}
+
+#booking-summary-container h2{
+    margin: 0 0 20px 0;
+}
+
+#room-type{
+    margin-bottom: 10px;
+}
+
+#room-desc, #room-amenities{
+    color: #74796F;
+    font-size: 0.85rem;
+    margin: 10px 0;
+}
+
+.divider{
+    border: 1px solid #E2E5DD;
+    margin: 20px 0;
+}
+
+.summary-items{
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.summary-items-desc{
+    color: #74796F;
+    font-size: 0.9rem;
+    margin: 10px 0;
+}
+
+.summary-items-calc{
+    color: #252B25;
+    font-weight: bold;
+    font-size: 0.95rem;
+    margin: 10px 0;
+}
+
+#total-cost-desc{
+    display: flex;
+    align-self: center;
+    margin: 0;
+}
+
+#total-cost-calc{
+    color: #252B25;
+    font-weight: bold;
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+#confirm-booking-btn{
+    width: 100%;
+    margin-top: 20px;
+    padding: 11px 16px;
+    border: 1px solid #52634B;
+    border-radius: 6px;
+    background: #52634B;
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#confirm-booking-btn:hover{
+    background: #374432;
+}
+
+@media (max-width: 700px){
+    header{
+        padding: 5px 20px;
+    }
+
+    .main-container{
+        padding: 20px;
+    }
+
+    #dropdown-contents{
+        padding: 20px;
+    }
+}
