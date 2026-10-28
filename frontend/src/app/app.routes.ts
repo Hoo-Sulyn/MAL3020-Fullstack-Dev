@@ -5,7 +5,7 @@ import { HotelBooking } from './pages/guests/hotel-booking/hotel-booking';
 import { RoomDetails } from './pages/guests/room-details/room-details';
 import { ConfirmBooking } from './pages/guests/confirmBooking/confirmBooking';
 import { History } from './pages/guests/history/history';
-import { AdminLogin } from './pages/admin/login/adminLogin';
+import { AdminLogin } from './pages/admin/adminLogin/adminLogin';
 
 export const routes: Routes = [
     // GUEST INTERFACE
