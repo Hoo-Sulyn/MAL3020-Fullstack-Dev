@@ -9,15 +9,25 @@
 
   <!-- ADMIN INTERFACE -->
   <a routerLink="/adminLogin">Admin login</a>
+  <a routerLink="/dashboard">Dashboard</a>
+  <a routerLink="/roomManagement">Room Management</a>
 </nav>
 
 @if (showGuestHeader) {
   <app-guest-header></app-guest-header>
 }
 
+@if (showAdminLayout) {
+  <app-admin-header></app-admin-header>
+}
+
 <main class="route-content">
   <router-outlet></router-outlet>
 </main>
+
+@if (showAdminLayout) {
+  <app-admin-footer></app-admin-footer>
+}
 
 @if (showGuestFooter) {
   <app-guest-footer></app-guest-footer>

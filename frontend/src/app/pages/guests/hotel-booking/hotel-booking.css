@@ -38,6 +38,10 @@ form{
     min-width: 0;
 }
 
+.search-field{
+    flex: 1.25 1 0;
+}
+
 .search-field img{
     width: auto;
     height: 17px;
@@ -46,19 +50,41 @@ form{
 .field-container{
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    flex: 1;
+    gap: 6px;
     min-width: 0;
+    padding: 8px 10px;
 }
 
 .search-field label{
     font-size: 0.8rem;
     color: #74796F;
+    line-height: 1.2;
 }
 
 .search-field input{
     border: 1px solid transparent;
     cursor: pointer;
     transition: all 0.3s ease;
+}
+
+.search-field input[type="date"]{
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 1.2em;
+    padding: 0;
+    border-color: transparent;
+    border-radius: 6px;
+    background: transparent;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.search-field input[type="date"]:focus-visible{
+    outline: none;
+    background-color: #F7F8F5;
 }
 
 .search-field input:hover{

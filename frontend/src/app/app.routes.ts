@@ -8,6 +8,8 @@ import { History } from './pages/guests/history/history';
 import { Profile } from './pages/guests/profile/profile';
 
 import { AdminLogin } from './pages/admin/adminLogin/adminLogin';
+import { Dashboard } from './pages/admin/dashboard/dashboard';
+import { RoomManagement } from './pages/admin/roomManagement/roomManagement';
 
 export const routes: Routes = [
     // GUEST INTERFACE
@@ -21,5 +23,7 @@ export const routes: Routes = [
     
     // ADMIN INTERFACE
     { path: 'adminLogin', component: AdminLogin },
+    { path: 'dashboard', component: Dashboard },
+    { path: 'roomManagement', component: RoomManagement },
 
 ];

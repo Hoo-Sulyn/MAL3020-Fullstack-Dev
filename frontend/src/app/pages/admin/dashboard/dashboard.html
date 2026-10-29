@@ -1,0 +1,168 @@
+<div id="dashboard-container">
+    <h1>Dashboard</h1>
+    <p>Your overview of haven, all in one place.</p>
+
+    <div class="at-a-glance-container">
+
+        <!-- CURRENT ROOMS BOOKED -->
+        <div class="at-a-glance-cards" id="current-rooms-booked-card">
+            <div class="card-title">
+                <small id="current-rooms-booked">Current rooms booked</small>
+                <img src="bed-icon.png" alt="bed">
+            </div>
+            <div class="main-contents">
+                <p>
+                    <span class="card-numbers" id="num-booked-rooms">0</span>
+                      of <span id="total-rooms">0</span> rooms
+                </p>
+            </div>
+            <p class="at-a-glance-footer">
+                <span id="occupancy-percentage">0%</span>
+                 occupancy today
+            </p>
+        </div>
+
+        <!-- MONTHLY REVENUE -->
+        <div class="at-a-glance-cards" id="current-rooms-booked-card">
+            <div class="card-title">
+                <small id="current-rooms-booked">Monthly revenue</small>
+                <img src="wallet-icon.png" alt="renevue">
+            </div>
+            <div class="main-contents">
+                <p>
+                    <span class="card-numbers" id="monthly-revenue">RM 0</span>
+                      MYR
+                </p>
+            </div>
+            <p class="at-a-glance-footer">
+                <span id="current-month">October</span>
+                 revenue to date
+            </p>
+        </div>
+
+        <!-- ROOM STATUS -->
+        <div class="at-a-glance-cards" id="current-rooms-booked-card">
+            <div class="card-title">
+                <small id="current-rooms-booked">Room status</small>
+                <img src="calendar-icon.png" alt="bed">
+            </div>
+            <div class="main-contents">
+                <p>
+                    <span class="card-numbers" id="num-rooms-available">0</span>
+                      rooms available
+                </p>
+            </div>
+            <p class="at-a-glance-footer">
+                <span id="occupancy-percentage">0%</span>
+                 occupancy today
+            </p>
+        </div>
+    </div>
+
+    <div id="today-at-a-glance-container">
+        <div id="today-at-a-glance">
+            <small style="font-weight: bold;">Today at a glance</small>
+
+            <div class="mini-glance-container" id="arrivals">
+                <img src="arrival-icon.png">
+                <small>
+                    <span id="num-arrival">0</span> arrivals
+                </small>
+            </div>
+
+            <div class="mini-glance-container" id="departure">
+                <img src="departure-icon.png">
+                <small>
+                    <span id="num-departure">0</span> departures
+                </small>
+            </div>
+
+            <div class="mini-glance-container" id="room-available">
+                <img src="key-icon.png">
+                <small>
+                    <span id="num-room-available">0</span> rooms available
+                </small>
+            </div>
+        </div>
+        <a class="router-link" id="manage-rooms" routerLink="/roomManagement">Manage rooms →</a>
+    </div>
+
+    <div id="header-container">
+        <div id="header">
+            <h2 style="margin:0;">Recent bookings</h2>
+            <small>
+                <span id="total-reservation">0</span> total reservations
+            </small>
+        </div>
+        <a class="router-link" id="manage-bookings" routerLink="/bookingsManagement">Manage bookings →</a>
+    </div>
+
+    <div class="main-container">
+        <div id="table-summary">
+            <form id="search-bar">
+                <img src="black-search-icon.png" alt="search">
+                <input type="search" id="search-place" placeholder="Search guest or booking ID ">
+            </form>
+
+            <div id="filter-dropdown-container" (click)="$event.stopPropagation()">
+                <button
+                    type="button"
+                    id="status-filter-button"
+                    [attr.aria-expanded]="statusFilterDropdownOpen"
+                    aria-haspopup="listbox"
+                    aria-label="Filter bookings by status"
+                    (click)="toggleStatusFilterDropdown()">
+                    <span>{{ selectedStatus }}</span>
+                    <span class="filter-chevron" [class.is-open]="statusFilterDropdownOpen" aria-hidden="true"></span>
+                </button>
+
+                <div
+                    *ngIf="statusFilterDropdownOpen"
+                    id="status-filter-options"
+                    role="listbox"
+                    aria-label="Booking status">
+                    <button
+                        *ngFor="let status of bookingStatuses"
+                        type="button"
+                        role="option"
+                        [attr.aria-selected]="selectedStatus === status"
+                        [class.is-selected]="selectedStatus === status"
+                        (click)="selectBookingStatus(status)">
+                        {{ status }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <table id="table-container">
+            <colgroup>
+                <col class="guest-column">
+                <col span="6">
+            </colgroup>
+            <tr id="table-header">
+                <th>Guest</th>
+                <th>Room</th>
+                <th>Check-in</th>
+                <th>Check-out</th>
+                <th>Status</th>
+                <th>Total</th>
+                <th>Action</th>
+            </tr>
+            <tr id="table-contents">
+                <td id="guest-name-id">
+                    <span id="guest-name">Guest name</span>
+                    <span id="booking-id">HV-0000</span>
+                </td>
+                <td id="room-num-name">Room name</td>
+                <td id="check-in">Oct 01, 2026</td>
+                <td id="check-out">Oct 01, 2026</td>
+                <td id="booking-status">Confirmed</td>
+                <td id="total-price">RM 0</td>
+                <td id="action">Check in</td>
+            </tr>
+        </table>
+        <div id="table-footer">
+            <small>Showing top 5 recent reservations</small>
+        </div>
+    </div>
+</div>
