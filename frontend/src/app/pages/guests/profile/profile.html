@@ -1,0 +1,87 @@
+<div id="profile-container">
+    <h1>Your profile</h1>
+    <p>View and update the details you use for your stays at haven.</p>
+
+    <div class="main-container">
+        <div id="guest-profile-container">
+            <div class="card-container" id="preview-card">
+                <div id="guest-profile-pic">
+                    <p id="guest-initials">EW</p>
+                </div>
+                <div id="guest-name-email-container">
+                    <p id="guest-name">Guest Name</p>
+                    <small id="guest-email-account">
+                        <span id="guest-email">guest@email.com</span>
+                         • Guest account
+                    </small>
+                </div>
+            </div>
+
+            <div class="card-container" id="personal-details">
+                <h2>Personal details</h2>
+
+                <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+                    <div class="form-row">
+
+                        <!-- FIRST NAME -->
+                        <div class="form-group">
+                            <label for="first-name">First name</label>
+                            <input type="text" id="first-name" formControlName="firstName" placeholder="First Name">
+                        </div>
+
+                        <!-- LAST NAME -->
+                        <div class="form-group">
+                            <label for="first-name">Last name</label>
+                            <input type="text" id="last-name" formControlName="lastName" placeholder="Last Name">
+                        </div>
+                    </div>
+
+                    <!-- EMAIL -->
+                    <div class="form-group">
+                        <label for="email">Email address</label>
+                        <input type="email" id="email" formControlName="email" placeholder="example@email.com">
+                        <small class="hint">Use a valid email address that is not already in use.</small>
+                    </div>
+
+                    <!-- PHONE NUM -->
+                    <div class="form-group">
+                        <label for="phone">Phone number</label>
+                        <input type="tel" id="phone-num" formControlName="phoneNum" placeholder="+00 123456789">
+                        <small class="hint">Include your country code.</small>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="buttons-container">
+                        <button type="submit" id="save-changes">Save changes</button>
+                        <button type="button" id="cancel-changes">Cancel changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="delete-acc-confirmation-container">
+            <div class="card-container" id="delete-account-container">
+                <h3>Delete account</h3>
+                <p>Permanently remove your guest account and personal details. This cannot be undone.</p>
+
+                <button type="button" id="delete-acc-btn">Delete account</button>
+            </div>
+
+            <div class="card-container" id="delete-confirmation-container">
+                <small id="highlighted-note">Deletion confirmation</small>
+                <h3>This is permanent.</h3>
+
+                <div id="delete-note">
+                    <p id="delete-header">Before you delete</p>
+                    <small id="delete-desc">You will be signed out and will no longer be able to access your profile or booking history. Your personal details will be permanently removed.</small>
+                </div>
+
+                <div class="buttons-container">
+                    <button type="button" id="keep-acc">Keep account</button>
+                    <button type="button" id="delete-acc">Delete account</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

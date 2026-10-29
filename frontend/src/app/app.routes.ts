@@ -5,6 +5,8 @@ import { HotelBooking } from './pages/guests/hotel-booking/hotel-booking';
 import { RoomDetails } from './pages/guests/room-details/room-details';
 import { ConfirmBooking } from './pages/guests/confirmBooking/confirmBooking';
 import { History } from './pages/guests/history/history';
+import { Profile } from './pages/guests/profile/profile';
+
 import { AdminLogin } from './pages/admin/adminLogin/adminLogin';
 
 export const routes: Routes = [
@@ -15,6 +17,7 @@ export const routes: Routes = [
     { path: 'roomDetails', component: RoomDetails },
     { path: 'confirmBooking', component: ConfirmBooking },
     { path: 'history', component: History },
+    { path: 'profile', component: Profile },
     
     // ADMIN INTERFACE
     { path: 'adminLogin', component: AdminLogin },
