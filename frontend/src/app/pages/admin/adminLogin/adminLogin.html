@@ -11,20 +11,26 @@
       <p style="font-size: 0.9rem; color:#74796F;">Sign in to manage rooms and guest bookings.</p>
 
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <p *ngIf="errorMessage()" class="form-error" role="alert" aria-live="assertive">{{ errorMessage() }}</p>
 
         <!-- Email -->
         <div class="form-group">
           <label for="email">Staff email address</label>
-          <input type="email" id="email" formControlName="email" placeholder="Enter staff email">
+          <input type="email" id="email" formControlName="email" placeholder="Enter staff email" autocomplete="username" (input)="clearError()" [attr.aria-invalid]="loginForm.get('email')?.touched && loginForm.get('email')?.invalid">
+          <small *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.hasError('required')" class="field-error">Staff email is required.</small>
+          <small *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.hasError('email')" class="field-error">Enter a valid staff email address.</small>
         </div>
 
         <!-- Password -->
         <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" id="password" formControlName="password" placeholder="Enter password">
+          <input type="password" id="password" formControlName="password" placeholder="Enter password" autocomplete="current-password" (input)="clearError()" [attr.aria-invalid]="loginForm.get('password')?.touched && loginForm.get('password')?.invalid">
+          <small *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required')" class="field-error">Password is required.</small>
         </div>
         
-        <button type="submit" [disabled]="loginForm.invalid">Sign in to staff workspace</button>
+        <button type="submit" [disabled]="isSubmitting()">
+          {{ isSubmitting() ? 'Signing in…' : 'Sign in to staff workspace' }}
+        </button>
       </form>
 
       <div id="divider"></div>
@@ -36,7 +42,7 @@
     </div>
 
     <div class="guest-link" style="margin-top: 15px;">
-      <a href="/">← Back to guest login</a>
+      <a routerLink="/">← Back to guest login</a>
     </div>  
 
     <small id="staff-note">Need staff access? Contact your hotel manager.</small>

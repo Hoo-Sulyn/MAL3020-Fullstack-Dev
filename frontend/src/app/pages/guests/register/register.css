@@ -96,3 +96,30 @@ button:hover{
     color: #52634B;
     font-weight: bold;
 }
+
+.form-error {
+    margin: 0 0 12px;
+    color: #a6534b;
+    font-size: 0.85rem;
+}
+
+.form-success {
+    margin: 0 0 12px;
+    color: #2f6b4a;
+    font-size: 0.85rem;
+}
+
+.field-error {
+    display: block;
+    color: #a6534b;
+    font-size: 0.78rem;
+}
+
+.form-group input[aria-invalid="true"] {
+    border-color: #a6534b;
+}
+
+button:disabled {
+    cursor: wait;
+    opacity: 0.75;
+}

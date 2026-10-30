@@ -61,6 +61,25 @@ form{
     padding: 15px;
 }
 
+.form-error,
+.field-error {
+    color: #a6534b;
+}
+
+.form-error {
+    margin: 0 0 12px;
+    font-size: 0.85rem;
+}
+
+.field-error {
+    display: block;
+    font-size: 0.78rem;
+}
+
+.form-group input[aria-invalid="true"] {
+    border-color: #a6534b;
+}
+
 button{
     border: 1px solid #52634B;
     border-radius: 8px;
@@ -72,6 +91,11 @@ button{
     font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.3s ease;
+}
+
+button:disabled {
+    cursor: wait;
+    opacity: 0.75;
 }
 
 button:hover{

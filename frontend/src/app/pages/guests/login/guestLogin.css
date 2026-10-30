@@ -107,3 +107,18 @@ button:hover{
     text-decoration: none;
     font-weight: bold;
 }
+.form-error {
+    margin: 0 0 12px;
+    color: #a6534b;
+    font-size: 0.85rem;
+}
+
+.field-error {
+    display: block;
+    color: #a6534b;
+    font-size: 0.78rem;
+}
+
+.form-group input[aria-invalid="true"] {
+    border-color: #a6534b;
+}

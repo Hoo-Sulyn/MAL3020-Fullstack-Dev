@@ -1,11 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../../services/auth.service';
+import { RealtimeService } from '../../../services/realtime.service';
 
 @Component({
     selector: 'app-guest-login',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule],
+    imports: [CommonModule, ReactiveFormsModule, RouterLink],
     templateUrl: './guestLogin.html',
     styleUrl: './guestLogin.css'
 
@@ -13,17 +16,62 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 
 export class GuestLogin {
     loginForm: FormGroup;
+    errorMessage = signal('');
+    showRegisterPrompt = signal(false);
+    isSubmitting = signal(false);
 
-    constructor(private fb: FormBuilder) {
+    constructor(
+        private fb: FormBuilder,
+        private auth: AuthService,
+        private realtime: RealtimeService,
+        private router: Router,
+        private route: ActivatedRoute
+    ) {
         this.loginForm = this.fb.group({
         email: ['', [Validators.required, Validators.email]],
         password: ['', Validators.required]
     });
     }
 
-    onSubmit() {
-    if (this.loginForm.valid) {
-      console.log(this.loginForm.value);
+    onSubmit(): void {
+        if (this.loginForm.invalid || this.isSubmitting()) {
+            this.loginForm.markAllAsTouched();
+            if (this.loginForm.get('email')?.hasError('required') ||
+                this.loginForm.get('password')?.hasError('required')) {
+                this.errorMessage.set('Please fill in both your email and password.');
+            } else {
+                this.errorMessage.set('Please enter a valid email address.');
+            }
+            this.showRegisterPrompt.set(false);
+            return;
+        }
+
+        this.isSubmitting.set(true);
+        this.errorMessage.set('');
+        this.showRegisterPrompt.set(false);
+        const { email, password } = this.loginForm.getRawValue();
+        this.auth.login(email, password, 'guest').subscribe({
+            next: response => {
+                this.realtime.connect(response.token);
+                const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+                this.router.navigateByUrl(returnUrl?.startsWith('/') && !returnUrl.startsWith('//')
+                    ? returnUrl
+                    : '/hotelBooking');
+            },
+            error: error => {
+                if (error.status === 401) {
+                    this.errorMessage.set('Invalid email or password. Have you registered a guest account yet?');
+                    this.showRegisterPrompt.set(true);
+                } else {
+                    this.errorMessage.set(error.error?.message || 'Unable to sign in. Please try again.');
+                }
+                this.isSubmitting.set(false);
+            }
+        });
     }
-  }
+
+    clearError(): void {
+        this.errorMessage.set('');
+        this.showRegisterPrompt.set(false);
+    }
 }

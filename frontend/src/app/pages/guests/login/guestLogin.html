@@ -11,25 +11,33 @@
       <p style="font-size: 0.9rem; color:#74796F;">Sign in to book your next stay at haven.</p>
 
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <p *ngIf="errorMessage()" class="form-error" role="alert" aria-live="assertive">
+          {{ errorMessage() }}
+        </p>
 
         <!-- Email -->
         <div class="form-group">
           <label for="email">Email</label>
-          <input type="email" id="email" formControlName="email" placeholder="Enter email">
+          <input type="email" id="email" formControlName="email" placeholder="Enter email" autocomplete="email" (input)="clearError()" [attr.aria-invalid]="loginForm.get('email')?.touched && loginForm.get('email')?.invalid">
+          <small *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.hasError('required')" class="field-error">Email is required.</small>
+          <small *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.hasError('email')" class="field-error">Enter a valid email address.</small>
           <small class="hint">Enter a valid email address that is not already registered.</small>
         </div>
 
         <!-- Password -->
         <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" id="password" formControlName="password" placeholder="Enter password">
+          <input type="password" id="password" formControlName="password" placeholder="Enter password" autocomplete="current-password" (input)="clearError()" [attr.aria-invalid]="loginForm.get('password')?.touched && loginForm.get('password')?.invalid">
+          <small *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required')" class="field-error">Password is required.</small>
         </div>
         
-        <button type="submit" [disabled]="loginForm.invalid">Sign in</button>
+        <button type="submit" [disabled]="isSubmitting()">
+          {{ isSubmitting() ? 'Signing in…' : 'Sign in' }}
+        </button>
       </form>
 
       <div class="login-link">
-        <p style="color:#74796F;">New to haven? <a href="/guestRegister">Create an account</a></p> 
+        <p style="color:#74796F;">New to haven? <a routerLink="/guestRegister">Create an account</a></p> 
       </div>
 
       <div id="divider"></div>
@@ -38,7 +46,7 @@
     </div>
 
     <div class="staff-link" style="margin: 5px;">
-      <p style="color:#74796F;">Working at haven? <a href="/adminLogin">Staff sign in →</a></p>
+      <p style="color:#74796F;">Working at haven? <a routerLink="/adminLogin">Staff sign in →</a></p>
     </div>  
   </div>
 </div>
