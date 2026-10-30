@@ -10,6 +10,7 @@ import { Profile } from './pages/guests/profile/profile';
 import { AdminLogin } from './pages/admin/adminLogin/adminLogin';
 import { Dashboard } from './pages/admin/dashboard/dashboard';
 import { RoomManagement } from './pages/admin/roomManagement/roomManagement';
+import { BookingManagement } from './pages/admin/bookingManagement/bookingManagement';
 
 export const routes: Routes = [
     // GUEST INTERFACE
@@ -25,5 +26,6 @@ export const routes: Routes = [
     { path: 'adminLogin', component: AdminLogin },
     { path: 'dashboard', component: Dashboard },
     { path: 'roomManagement', component: RoomManagement },
+    { path: 'bookingManagement', component: BookingManagement}
 
 ];

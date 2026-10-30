@@ -1,0 +1,306 @@
+<div id="room-management-container">
+    <div id="header-container">
+        <div id="header-contents">
+            <h1>Room management</h1>
+            <small>Manage fixed rates, room details and the status of every room at haven.</small>
+            <p id="room-management-summary">
+                <span id="total-rooms">0</span> rooms •
+                <span id="total-available-rooms">0</span> available •
+                <span id="total-occupied-rooms">0</span> occupied •
+                <span id="total-maintenance">0</span> maintenance •
+                <span id="today-date">Oct 16, 2026</span>
+            </p>
+        </div>
+        <div id="header-add-room-btn">
+            <button type="button" id="add-room-btn">+ Add room</button>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div id="room-list-add">
+            <div class="room-card-container" id="room-list-container">
+                <div id="room-list-filter-section">
+                    <form id="search-bar" (submit)="$event.preventDefault()">
+                        <img src="black-search-icon.png" alt="search">
+                        <input
+                            type="search"
+                            id="search-place"
+                            placeholder="Search room number, type or details"
+                            aria-label="Search rooms by number, type or details"
+                            [value]="searchQuery"
+                            (input)="updateSearchQuery($event)">
+                    </form>
+                    <div id="status-filter-dropdown" (click)="$event.stopPropagation()">
+                        <button
+                            type="button"
+                            id="status-filter-button"
+                            [attr.aria-expanded]="statusFilterDropdownOpen"
+                            aria-haspopup="listbox"
+                            aria-label="Filter rooms by status"
+                            (click)="toggleStatusFilterDropdown()">
+                            <span>{{ selectedStatus }}</span>
+                            <span class="filter-chevron" [class.is-open]="statusFilterDropdownOpen" aria-hidden="true"></span>
+                        </button>
+                        <div
+                            *ngIf="statusFilterDropdownOpen"
+                            id="status-filter-options"
+                            role="listbox"
+                            aria-label="Room status">
+                            <button
+                                *ngFor="let status of roomStatusFilters"
+                                type="button"
+                                role="option"
+                                [attr.aria-selected]="selectedStatus === status"
+                                [class.is-selected]="selectedStatus === status"
+                                (click)="selectStatusFilter(status)">
+                                {{ status }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <table id="room-list-table">
+                    <colgroup>
+                        <col class="room-column">
+                        <col class="type-column">
+                        <col class="details-column">
+                        <col class="capacity-column">
+                        <col class="nightly-column">
+                        <col class="status-column">
+                        <col class="actions-column">
+                    </colgroup>
+                    <thead>
+                        <tr id="room-list-header">
+                            <th>Room</th>
+                            <th>Type</th>
+                            <th>Details</th>
+                            <th>Capacity</th>
+                            <th>Nightly</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let room of filteredRooms" class="room-list-contents">
+                            <td class="room-num">{{ room.number }}</td>
+                            <td>{{ room.type }}</td>
+                            <td>{{ room.details }}</td>
+                            <td>{{ room.capacity }}</td>
+                            <td>RM {{ room.nightlyRate }}</td>
+                            <td>
+                                <p class="room-status-label" [ngClass]="'status-' + room.status.toLowerCase()">
+                                    {{ room.status }}
+                                </p>
+                            </td>
+                            <td class="actions">
+                                <button type="button" class="edit-btn">Edit</button> •
+                                <button type="button" class="delete-btn">Delete</button>
+                                <div class="table-status-dropdown" (click)="$event.stopPropagation()">
+                                    <button
+                                        type="button"
+                                        class="table-status-button"
+                                        [attr.aria-expanded]="roomStatusDropdownOpen === room.number"
+                                        aria-haspopup="listbox"
+                                        [attr.aria-label]="'Set status for room ' + room.number"
+                                        (click)="toggleRoomStatusDropdown(room.number)">
+                                        Set status <span aria-hidden="true">▾</span>
+                                    </button>
+                                    <div
+                                        *ngIf="roomStatusDropdownOpen === room.number"
+                                        class="table-status-options"
+                                        role="listbox"
+                                        [attr.aria-label]="'Status for room ' + room.number">
+                                        <button
+                                            *ngFor="let status of roomStatuses"
+                                            type="button"
+                                            role="option"
+                                            [attr.aria-selected]="room.status === status"
+                                            [class.is-selected]="room.status === status"
+                                            (click)="selectRoomStatus(room, status)">
+                                            {{ status }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr *ngIf="filteredRooms.length === 0" class="room-list-contents">
+                            <td colspan="7">No rooms match the selected filters.</td>
+                        </tr>
+                    </tbody> 
+                </table>
+                <div class="tfoot">
+                    <div id="count-rooms-page">
+                        <small id="count-rooms">1-8 of 30 rooms</small> •
+                        <small id="count-page">Page 1-1</small>
+                    </div>
+                    <div id="previous-next-btn">
+                        <button type="button">Previous</button>
+                        <button type="button">Next →</button>
+                    </div>
+                </div> 
+            </div>
+
+            <div class="room-card-container" id="add-room-container">
+                <h3>Add a room</h3>
+
+                <form id="add-room-form">
+                    <div class="form-row">
+
+                        <!-- ROOM NUM -->
+                        <div class="form-column">
+                            <label for="room-num">Room number</label>
+                            <input type="number" id="form-room-num" placeholder="Example: 001">
+                        </div>
+
+                        <!-- ROOM TYPE -->
+                        <div class="form-column">
+                            <label for="form-room-type">Room type</label>
+                            <select id="form-room-type" class="form-select" required>
+                                <option value="" disabled selected>Select room type</option>
+                                <option value="Superior King">Superior King</option>
+                                <option value="Garden Suite">Garden Suite</option>
+                                <option value="River View Double">River View Double</option>
+                            </select>
+                        </div>
+
+                        <!-- CAPACITY -->
+                        <div class="form-column">
+                            <label for="room-capacity">Capacity</label>
+                            <input type="number" id="form-room-capacity" placeholder="Guest capacity">
+                        </div>
+
+                        <!-- FIXED RATE -->
+                        <div class="form-column">
+                            <label for="room-price-rate">Fixed rate • MYR/night</label>
+                            <input type="number" id="form-room-price-rate" placeholder="Price per night">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+
+                        <!-- ROOM FLOOR -->
+                        <div class="form-column">
+                            <label for="room-floor">Floor number</label>
+                            <input type="number" id="form-room-floor" placeholder="Example: 1">
+                        </div>
+
+                        <!-- DESCRIPTION -->
+                        <div class="form-column" style="flex:2;">
+                            <label for="room-desc">Description & specifications</label>
+                            <input type="text" id="form-room-desc" placeholder="Example: City view · King bed">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+
+                        <!-- ROOM STATUS -->
+                        <div class="form-column">
+                            <label for="form-room-status">Initial status</label>
+                            <select id="form-room-status" class="form-select">
+                                <option value="Available" selected>Available</option>
+                                <option value="Occupied">Occupied</option>
+                                <option value="Maintenance">Maintenance</option>
+                            </select>
+                        </div>
+
+                        <!-- AMENITITES -->
+                        <div class="form-column" style="flex:2;">
+                            <label for="room-amenities">Amenities</label>
+                            <input type="text" id="form-room-amenities" placeholder="Example: Wi-Fi · Breakfast included">
+                        </div>
+                    </div>
+
+                    <div class="form-row" id="form-btn-container">
+                        <button type="submit" class="submit-btn" id="create-room-btn">Create room</button>
+                        <button type="button" class="cancel-btn">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div id="room-edit-delete">
+            <div class="room-card-container" id="edit-room-container">
+                <small id="highlighted-note">Selected room • <span id="edit-room-num">0000</span></small>
+                <h3>Edit room</h3>
+
+                <form id="edit-room-form">
+                    <div class="form-row">
+                        <!-- ROOM NUMBER -->
+                        <div class="form-column">
+                            <label for="room-num">Room number</label>
+                            <input type="number" id="edit-room-num" placeholder="Example: 001">
+                        </div>
+
+                        <!-- ROOM FLOOR -->
+                        <div class="form-column">
+                            <label for="room-floor">Floor number</label>
+                            <input type="number" id="edit-room-floor" placeholder="Example: 1">
+                        </div>
+                    </div>
+
+                    <!-- ROOM TYPE -->
+                    <div class="form-column">
+                        <label for="room-type">Room type</label>
+                        <select id="edit-room-type" class="form-select" required>
+                            <option value="" disabled selected>Select room type</option>
+                            <option value="Superior King">Superior King</option>
+                            <option value="Garden Suite">Garden Suite</option>
+                            <option value="River View Double">River View Double</option>
+                        </select>
+                    </div>
+
+                    <!-- DESCRIPTION -->
+                    <div class="form-column">
+                        <label for="room-desc">Description & specifications</label>
+                        <input type="text" id="edit-room-desc" placeholder="Example: City view · King bed">
+                    </div>
+
+                    <!-- AMENITITES -->
+                    <div class="form-column" style="flex:2;">
+                        <label for="room-amenities">Amenities</label>
+                        <input type="text" id="edit-room-amenities" placeholder="Example: Wi-Fi · Breakfast included">
+                    </div>
+
+                    <div class="form-row">
+                        <!-- CAPACITY -->
+                        <div class="form-column">
+                            <label for="room-capacity">Capacity</label>
+                            <input type="number" id="edit-room-capacity" placeholder="Guest capacity">
+                        </div>
+
+                        <!-- FIXED RATE -->
+                        <div class="form-column">
+                            <label for="room-price-rate">Fixed rate • MYR/night</label>
+                            <input type="number" id="edit-room-price-rate" placeholder="Price per night">
+                        </div>
+                    </div>
+
+                    <!-- ROOM STATUS -->
+                    <div class="form-column">
+                        <label for="form-room-status">Initial status</label>
+                        <select id="form-room-status" class="form-select">
+                            <option value="Available" selected>Available</option>
+                            <option value="Occupied">Occupied</option>
+                            <option value="Maintenance">Maintenance</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row" id="edit-btn-container">
+                        <button type="submit" class="submit-btn" id="save-changes-btn">Save changes</button>
+                        <button type="button" class="cancel-btn">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="room-card-container" id="delete-room-container">
+                <small id="delete-highlighted-note">Delete confirmation</small>
+                <h3>Delete room <span id="delete-room-num">000</span>?</h3>
+                <p>This room will be removed from the inventory. This action cannot be undone.</p>
+
+                <div class="form-row" id="delete-btn-container">
+                    <button type="button" class="cancel-btn">Cancel</button>
+                    <button type="submit" class="submit-btn" id="delete-room-btn">Delete room</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

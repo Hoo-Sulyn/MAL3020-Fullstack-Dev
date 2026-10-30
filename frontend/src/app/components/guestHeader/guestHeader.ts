@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
     selector: 'app-guest-header',
@@ -9,5 +9,10 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 })
 
 export class GuestHeader {
-    
+    constructor(private router: Router) {}
+
+    get roomsSectionActive(): boolean {
+        const currentPath = this.router.url.split(/[?#]/, 1)[0].replace(/\/$/, '');
+        return ['/hotelBooking', '/roomDetails', '/confirmBooking'].includes(currentPath);
+    }
 }

@@ -2,7 +2,12 @@
         <img style="width:90px; padding: 10px 0;" src="haven-full-logo.png" alt="Logo">
         
         <div class="nav">
-            <a id="rooms" routerLink="/hotelBooking" routerLinkActive="active">Rooms</a>
+            <a
+                id="rooms"
+                routerLink="/hotelBooking"
+                [class.active]="roomsSectionActive">
+                Rooms
+            </a>
             <a id="history" routerLink="/history" routerLinkActive="active">History</a>
             <a id="profile" routerLink="/profile" routerLinkActive="active">Profile</a>
         </div>

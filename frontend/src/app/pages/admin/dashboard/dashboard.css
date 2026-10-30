@@ -266,18 +266,18 @@ th, td{
     text-align: left;
 }
 
-#table-contents{
+.table-contents{
     background-color: white;
     font-size: 0.9rem;
 }
 
-#guest-name-id{
+.guest-name-id{
     display: flex;
     flex-direction: column;
     gap: 5px;
 }
 
-#booking-id{
+.booking-id{
     color: #74796F;
     font-size: 0.8rem;
 }

@@ -25,10 +25,10 @@ export class App {
   }
 
   get showGuestHeader(): boolean {
-    return !['/', '/guestRegister', '/adminLogin', '/dashboard', '/roomManagement'].includes(this.currentPath);
+    return !['/', '/guestRegister', '/adminLogin', '/dashboard', '/roomManagement', '/bookingManagement'].includes(this.currentPath);
   }
 
   get showGuestFooter(): boolean {
-    return !['/adminLogin', '/dashboard', '/roomManagement'].includes(this.currentPath);
+    return !['/adminLogin', '/dashboard', '/roomManagement', '/bookingManagement'].includes(this.currentPath);
   }
 }
