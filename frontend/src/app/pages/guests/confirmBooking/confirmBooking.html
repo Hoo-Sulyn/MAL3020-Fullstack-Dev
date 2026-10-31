@@ -1,155 +1,127 @@
 <div id="confirm-booking-container">
   <div class="main-container">
-    <a id="back-to-room-details" routerLink="/roomDetails">← Back to room details</a>
+    <a id="back-to-room-details" routerLink="/hotelBooking">← Back to rooms</a>
 
     <div id="title">
-        <small>REVIEW & CONFIRM</small>
-        <h1>A few details, then you're in!</h1>
-        <p>Check your stay and guest details before confirming your booking.</p>
+      <small>REVIEW & CONFIRM</small>
+      <h1>A few details, then you're in!</h1>
+      <p>Check your stay and guest details before confirming your booking.</p>
     </div>
 
-    <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()" id="forms-container">
-        <div id="stay-guest-details-container">
-            <div id="stay-details">
-                <h2>Your stay</h2>
+    <p *ngIf="isLoading" role="status">Loading booking details…</p>
+    <p *ngIf="errorMessage" class="booking-error" role="alert">{{ errorMessage }}</p>
 
-                <div id="stay-details-form">
-                    <!-- CHeck in -->
-                    <div class="stay-fields" id="check-in">
-                        <label for="check-in-date">Check-in</label>
-                        <input type="date" id="check-in-date" formControlName="check-in-date">
+    <form *ngIf="room as selectedRoom" [formGroup]="bookingForm" (ngSubmit)="onSubmit()" id="forms-container">
+      <div id="stay-guest-details-container">
+        <div id="stay-details">
+          <h2>Your stay</h2>
+          <div id="stay-details-form">
+            <div class="stay-fields" id="check-in">
+              <label for="check-in-date">Check-in</label>
+              <input type="date" id="check-in-date" formControlName="check-in-date" required>
+            </div>
+            <div class="stay-fields" id="check-out">
+              <label for="check-out-date">Check-out</label>
+              <input type="date" id="check-out-date" formControlName="check-out-date" required>
+            </div>
+            <div class="stay-fields" id="num-guests">
+              <label for="num-guests">Guests</label>
+              <div class="dropdown-container" (click)="$event.stopPropagation()">
+                <button
+                  type="button"
+                  id="dropdown-btn"
+                  aria-haspopup="dialog"
+                  [attr.aria-expanded]="occupancyDropdownOpen"
+                  (click)="toggleOccupancyDropdown()">
+                  <span class="occupancy-trigger-summary">{{ occupancySummary }}</span>
+                  <span class="dropdown-chevron" [class.is-open]="occupancyDropdownOpen" aria-hidden="true"></span>
+                </button>
+                <div
+                  *ngIf="occupancyDropdownOpen"
+                  id="dropdown-contents"
+                  role="dialog"
+                  aria-label="Guest count">
+                  <div class="occupancy-row">
+                    <label for="adults-count">Adults</label>
+                    <div class="counter-control">
+                      <button type="button" aria-label="Decrease adults" [disabled]="adults <= 1" (click)="decreaseCount('adults')">−</button>
+                      <output id="adults-count">{{ adults }}</output>
+                      <button type="button" aria-label="Increase adults" (click)="increaseCount('adults')">+</button>
                     </div>
-                    
-
-                    <!-- Check out -->
-                    <div class="stay-fields" id="check-out">
-                        <label for="check-out-date">Check-out</label>
-                        <input type="date" id="check-out-date" formControlName="check-out-date">
+                  </div>
+                  <div class="occupancy-row">
+                    <label for="children-count">Children</label>
+                    <div class="counter-control">
+                      <button type="button" aria-label="Decrease children" [disabled]="children <= 0" (click)="decreaseCount('children')">−</button>
+                      <output id="children-count">{{ children }}</output>
+                      <button type="button" aria-label="Increase children" (click)="increaseCount('children')">+</button>
                     </div>
-
-                    <!-- Num guests -->
-                    <div class="stay-fields" id="num-guests">
-                        <label for="num-guests">Guests</label>
-                        <div class="dropdown-container" (click)="$event.stopPropagation()">
-                            <button
-                                type="button"
-                                id="dropdown-btn"
-                                aria-haspopup="dialog"
-                                [attr.aria-expanded]="occupancyDropdownOpen"
-                                (click)="toggleOccupancyDropdown()">
-                                <span class="occupancy-trigger-summary">{{ occupancySummary }}</span>
-                                <span class="dropdown-chevron" [class.is-open]="occupancyDropdownOpen" aria-hidden="true"></span>
-                            </button>
-                            <div
-                                *ngIf="occupancyDropdownOpen"
-                                id="dropdown-contents"
-                                role="dialog"
-                                aria-label="Guests, rooms, and preferences">
-                                <div class="occupancy-row">
-                                    <label for="adults-count">Adults</label>
-                                    <div class="counter-control">
-                                        <button type="button" aria-label="Decrease adults" [disabled]="adults <= 1" (click)="decreaseCount('adults')">−</button>
-                                        <output id="adults-count">{{ adults }}</output>
-                                        <button type="button" aria-label="Increase adults" (click)="increaseCount('adults')">+</button>
-                                    </div>
-                                </div>
-
-                                <div class="occupancy-row">
-                                    <label for="children-count">Children</label>
-                                    <div class="counter-control">
-                                        <button type="button" aria-label="Decrease children" [disabled]="children <= 0" (click)="decreaseCount('children')">−</button>
-                                        <output id="children-count">{{ children }}</output>
-                                        <button type="button" aria-label="Increase children" (click)="increaseCount('children')">+</button>
-                                    </div>
-                                </div>
-
-                                <div class="occupancy-row">
-                                    <label for="rooms-count">Rooms</label>
-                                    <div class="counter-control">
-                                        <button type="button" aria-label="Decrease rooms" [disabled]="rooms <= 1" (click)="decreaseCount('rooms')">−</button>
-                                        <output id="rooms-count">{{ rooms }}</output>
-                                        <button type="button" aria-label="Increase rooms" (click)="increaseCount('rooms')">+</button>
-                                    </div>
-                                </div>
-
-                                <div class="dropdown-divider"></div>
-
-                                <div class="preference-row">
-                                    <span>Traveling with pets?</span>
-                                    <button
-                                        type="button"
-                                        class="toggle-switch"
-                                        role="switch"
-                                        aria-label="Traveling with pets"
-                                        [attr.aria-checked]="travelingWithPets"
-                                        [class.is-active]="travelingWithPets"
-                                        (click)="travelingWithPets = !travelingWithPets">
-                                        <span></span>
-                                    </button>
-                                </div>
-
-                                <button type="button" class="done-button" (click)="closeOccupancyDropdown()">Done</button>
-                            </div>
-                        </div>
-                    </div>
+                  </div>
+                  <div class="preference-row">
+                    <span>Traveling with pets?</span>
+                    <button
+                      type="button"
+                      class="toggle-switch"
+                      role="switch"
+                      aria-label="Traveling with pets"
+                      [attr.aria-checked]="travelingWithPets"
+                      [class.is-active]="travelingWithPets"
+                      (click)="travelingWithPets = !travelingWithPets">
+                      <span></span>
+                    </button>
+                  </div>
+                  <button type="button" class="done-button" (click)="closeOccupancyDropdown()">Done</button>
                 </div>
+              </div>
             </div>
-
-            <div id="guest-details">
-                <h2>Guest details</h2>
-
-                <div id="guest-detail-info">
-                    <div id="guest-name-email-number">
-                        <p id="guest-name">Name</p>
-                        <small id="guest-email-number"><span id="guest-email">email</span> • <span id="guest-number">number</span></small>
-                    </div>
-                    <div id="guest-edit-profile">
-                        <routerLink id="edit-profile-link" routerLink="/guest/profile">Edit in profile</routerLink>
-                    </div>
-                </div>
-                
-                <p class="note">This booking will be saved to your guest account.</p>
-            </div>
-
-            <div id="date-availability-feedback">
-                <p id="feedback-title">Check your dates</p>
-                <small id="feedback-content">Oct 19 → Oct 16 is not valid. Choose a check-out date after check-in to continue.</small>
-            </div>
+          </div>
         </div>
 
-        <div id="booking-summary-container">
-            <h2>Booking summary</h2>
-
-            <h3 id="room-type">Room type</h3>
-            <p id="room-desc">Room description</p>
-            <p id="room-amenities">Room amenities</p>
-
-            <div class="divider"></div>
-
-            <div class="summary-items">
-                <p class="summary-items-desc">Nightly rate</p>
-                <p class="summary-items-calc">RM <span id="nightly-rate">0</span></p>
+        <div id="guest-details">
+          <h2>Guest details</h2>
+          <div id="guest-detail-info">
+            <div id="guest-name-email-number">
+              <p id="guest-name">{{ user?.firstName }} {{ user?.lastName }}</p>
+              <small id="guest-email-number">
+                <span id="guest-email">{{ user?.email }}</span> • <span id="guest-number">{{ user?.phone }}</span>
+              </small>
             </div>
-
-            <div class="summary-items">
-                <p class="summary-items-desc">Length of stay</p>
-                <p class="summary-items-calc"><span id="length-of-stay">1</span> night(s)</p>
+            <div id="guest-edit-profile">
+              <a id="edit-profile-link" routerLink="/profile">Edit in profile</a>
             </div>
-
-            <div class="summary-items">
-                <p class="summary-items-desc">Guests</p>
-                <p class="summary-items-calc" id="guests-count">1 adult</p>
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="summary-items">
-                <p id="total-cost-desc">Total • MYR</p>
-                <p id="total-cost-calc">RM <span id="total-cost">0</span></p>
-            </div>
-
-            <button type="submit" id="confirm-booking-btn">Confirm booking</button>
+          </div>
+          <p class="note">This booking will be saved to your guest account.</p>
         </div>
+      </div>
+
+      <div id="booking-summary-container">
+        <h2>Booking summary</h2>
+        <h3 id="room-type">{{ selectedRoom.type }} · Room {{ selectedRoom.number }}</h3>
+        <p id="room-desc">{{ selectedRoom.description }}</p>
+        <p id="room-amenities">{{ selectedRoom.amenities }}</p>
+        <p *ngIf="travelingWithPets">Guest preference: traveling with pets</p>
+        <div class="divider"></div>
+        <div class="summary-items">
+          <p class="summary-items-desc">Nightly rate</p>
+          <p class="summary-items-calc">RM {{ selectedRoom.nightlyRate | number:'1.2-2' }}</p>
+        </div>
+        <div class="summary-items">
+          <p class="summary-items-desc">Length of stay</p>
+          <p class="summary-items-calc">{{ getNights() }} night(s)</p>
+        </div>
+        <div class="summary-items">
+          <p class="summary-items-desc">Guests</p>
+          <p class="summary-items-calc">{{ occupancySummary }}</p>
+        </div>
+        <div class="divider"></div>
+        <div class="summary-items">
+          <p id="total-cost-desc">Total • MYR</p>
+          <p id="total-cost-calc">RM {{ selectedRoom.nightlyRate * getNights() | number:'1.2-2' }}</p>
+        </div>
+        <button type="submit" id="confirm-booking-btn" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Confirming…' : 'Confirm booking' }}
+        </button>
+      </div>
     </form>
   </div>
 </div>

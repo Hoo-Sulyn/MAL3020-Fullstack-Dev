@@ -421,7 +421,7 @@ tr{
 }
 
 #edit-room-container{
-    display: block; /* change to block or none */
+    display: block;
 }
 
 #edit-btn-container{
@@ -449,7 +449,7 @@ tr{
 }
 
 #delete-room-container{
-    display: block;     /* change to block or none */
+    display: block;
 }
 
 #delete-highlighted-note{
@@ -487,3 +487,25 @@ tr{
     background-color: red;
 }
 
+.room-page-error,
+.form-error{
+    border-radius: 6px;
+    color: #9B5149;
+    font-size: 0.9rem;
+}
+
+.room-page-error{
+    margin: 0 0 16px;
+    padding: 12px 16px;
+    background: #FBF3F1;
+}
+
+.form-error{
+    margin: 0;
+}
+
+.submit-btn:disabled,
+.cancel-btn:disabled{
+    cursor: wait;
+    opacity: 0.65;
+}

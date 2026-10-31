@@ -1,15 +1,133 @@
-import { Component, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { AuthService } from '../../../services/auth.service';
+import { Booking, RoomService } from '../../../services/room.service';
+import { getHotelDateValue } from '../../../services/date.utils';
 
 @Component({
     selector: 'app-history',
     standalone: true,
-    imports: [CommonModule, RouterLink],
+    imports: [CommonModule],
     templateUrl: './history.html',
     styleUrl: './history.css'
 })
+export class History implements OnInit {
+    readonly todayLabel = new Intl.DateTimeFormat('en-MY', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+    }).format(new Date(`${getHotelDateValue()}T00:00:00`));
+    bookings: Booking[] = [];
+    selectedBooking: Booking | null = null;
+    isLoading = true;
+    isCancelling = false;
+    errorMessage = '';
+    successMessage = '';
 
-export class History {
+    constructor(
+        private readonly roomService: RoomService,
+        private readonly auth: AuthService,
+        private readonly route: ActivatedRoute,
+        private readonly changeDetector: ChangeDetectorRef
+    ) {}
 
+    get currentAndUpcomingBookings(): Booking[] {
+        const today = getHotelDateValue();
+        return this.bookings.filter((booking) =>
+            booking.status !== 'Cancelled' && booking.checkOut > today
+        );
+    }
+
+    get pastBookings(): Booking[] {
+        const today = getHotelDateValue();
+        return this.bookings.filter((booking) =>
+            booking.status !== 'Cancelled' && booking.checkOut <= today
+        );
+    }
+
+    get cancelledBookings(): Booking[] {
+        return this.bookings.filter((booking) => booking.status === 'Cancelled');
+    }
+
+    get guestName(): string {
+        const user = this.auth.getCurrentUser();
+        return user ? `${user.firstName} ${user.lastName}` : 'Guest';
+    }
+
+    ngOnInit(): void {
+        const confirmedBooking = this.route.snapshot.queryParamMap.get('confirmed');
+        if (confirmedBooking) {
+            this.successMessage = `Booking ${confirmedBooking} is confirmed.`;
+        }
+        this.roomService.getMyBookings().subscribe({
+            next: (bookings) => {
+                this.bookings = bookings;
+                this.isLoading = false;
+                this.changeDetector.markForCheck();
+            },
+            error: (error: unknown) => {
+                this.errorMessage = error instanceof HttpErrorResponse && typeof error.error?.message === 'string'
+                    ? error.error.message
+                    : error instanceof HttpErrorResponse && error.status === 0
+                        ? 'Cannot reach the server. Check that the backend is running.'
+                        : 'Unable to load your bookings.';
+                this.isLoading = false;
+                this.changeDetector.markForCheck();
+            },
+        });
+    }
+
+    canCancel(booking: Booking): boolean {
+        return booking.status === 'Confirmed' && booking.checkIn > getHotelDateValue();
+    }
+
+    openCancellation(booking: Booking): void {
+        this.selectedBooking = booking;
+        this.errorMessage = '';
+    }
+
+    keepBooking(): void {
+        this.selectedBooking = null;
+    }
+
+    confirmCancellation(): void {
+        if (!this.selectedBooking || this.isCancelling) {
+            return;
+        }
+        this.isCancelling = true;
+        this.errorMessage = '';
+        this.roomService.cancelBooking(this.selectedBooking.id).subscribe({
+            next: (updatedBooking) => {
+                this.bookings = this.bookings.map((booking) =>
+                    booking.id === updatedBooking.id ? updatedBooking : booking
+                );
+                this.selectedBooking = null;
+                this.isCancelling = false;
+                this.changeDetector.markForCheck();
+            },
+            error: (error: unknown) => {
+                this.errorMessage = error instanceof HttpErrorResponse && typeof error.error?.message === 'string'
+                    ? error.error.message
+                    : 'Unable to cancel this booking.';
+                this.isCancelling = false;
+                this.changeDetector.markForCheck();
+            },
+        });
+    }
+
+    formatDate(date: string): string {
+        const [year, month, day] = date.split('-').map(Number);
+        return new Intl.DateTimeFormat('en-MY', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+        }).format(new Date(year, month - 1, day));
+    }
+
+    getNights(booking: Booking): number {
+        return (Date.parse(`${booking.checkOut}T00:00:00Z`)
+            - Date.parse(`${booking.checkIn}T00:00:00Z`)) / 86_400_000;
+    }
 }

@@ -1,115 +1,103 @@
 <div id="room-details-container">
   <div class="main-container">
     <a id="back-to-rooms" routerLink="/hotelBooking">← Back to rooms</a>
-    <h1 id="room-type">Room type</h1>
-    <small id="room-floor-details">Room <span id="room-num">000</span> • <span id="room-desc">Room description</span></small>
+    <p *ngIf="isLoading" role="status">Loading room details…</p>
+    <p *ngIf="errorMessage" class="booking-error" role="alert">{{ errorMessage }}</p>
 
-    <div class="room-details-form">
+    <ng-container *ngIf="room as selectedRoom">
+      <h1 id="room-type">{{ selectedRoom.type }}</h1>
+      <small id="room-floor-details">
+        Room <span id="room-num">{{ selectedRoom.number }}</span> • Floor {{ selectedRoom.floor }} • {{ selectedRoom.description }}
+      </small>
+
+      <div class="room-details-form">
         <div id="room-details">
-            <div id="room-image">
-                <img src="hotel-room-1.webp" alt="Room image">
+          <div id="room-image">
+            <img src="hotel-room-1.webp" alt="Hotel room">
+          </div>
+
+          <div id="room-amenities-container">
+            <div class="room-amenities">
+              <img src="wifi-icon.png" alt="">
+              <p id="amenities-name">{{ selectedRoom.amenities }}</p>
             </div>
-
-            <div id="room-amenities-container">
-
-                <div class="room-amenities">
-                    <img src="wifi-icon.png" alt="amenities icon">
-                    <p id="amenities-name">Free Wifi</p>
-                </div>
-
-            </div>
-            <div class="divider"></div>
-
-            <small id="room-rules">Check-in from 3:00 pm · Check-out by 11:00 am · Non-smoking room</small>
+          </div>
+          <div class="divider"></div>
+          <small id="room-rules">Check-in from 3:00 pm · Check-out by 11:00 am · Non-smoking room</small>
         </div>
+
         <div id="room-form">
-            <h2>RM <span id="price-per-night">0</span></h2>
-            <small id="price-rules">MYR per night · Fixed nightly rate</small>
-            <div class="divider" style="margin: 25px 0;"></div>
+          <h2>RM <span id="price-per-night">{{ selectedRoom.nightlyRate | number:'1.2-2' }}</span></h2>
+          <small id="price-rules">MYR per night · Fixed nightly rate · Up to {{ selectedRoom.capacity }} guests</small>
+          <div class="divider" style="margin: 25px 0;"></div>
 
-            <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()">
+          <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()">
+            <label for="check-in-date">Check-in</label>
+            <input type="date" id="check-in-date" formControlName="check-in-date" required>
 
-                <!-- Check in -->
-                <label for="check-in-date">Check-in</label>
-                <input type="date" id="check-in-date" formControlName="check-in-date">
+            <label for="check-out-date">Check-out</label>
+            <input type="date" id="check-out-date" formControlName="check-out-date" required>
 
-                <!-- Check out -->
-                <label for="check-out-date">Check-out</label>
-                <input type="date" id="check-out-date" formControlName="check-out-date">
-
-                <!-- Num guests -->
-                <label for="num-guests">Guests</label>
-                <div class="dropdown-container" (click)="$event.stopPropagation()">
-                    <button
-                        type="button"
-                        id="dropdown-btn"
-                        aria-haspopup="dialog"
-                        [attr.aria-expanded]="occupancyDropdownOpen"
-                        (click)="toggleOccupancyDropdown()">
-                        <span class="occupancy-trigger-summary">{{ occupancySummary }}</span>
-                        <span class="dropdown-chevron" [class.is-open]="occupancyDropdownOpen" aria-hidden="true"></span>
-                    </button>
-                    <div
-                        *ngIf="occupancyDropdownOpen"
-                        id="dropdown-contents"
-                        role="dialog"
-                        aria-label="Guests, rooms, and preferences">
-                        <div class="occupancy-row">
-                            <label for="adults-count">Adults</label>
-                            <div class="counter-control">
-                                <button type="button" aria-label="Decrease adults" [disabled]="adults <= 1" (click)="decreaseCount('adults')">−</button>
-                                <output id="adults-count">{{ adults }}</output>
-                                <button type="button" aria-label="Increase adults" (click)="increaseCount('adults')">+</button>
-                            </div>
-                        </div>
-
-                        <div class="occupancy-row">
-                            <label for="children-count">Children</label>
-                            <div class="counter-control">
-                                <button type="button" aria-label="Decrease children" [disabled]="children <= 0" (click)="decreaseCount('children')">−</button>
-                                <output id="children-count">{{ children }}</output>
-                                <button type="button" aria-label="Increase children" (click)="increaseCount('children')">+</button>
-                            </div>
-                        </div>
-
-                        <div class="occupancy-row">
-                            <label for="rooms-count">Rooms</label>
-                            <div class="counter-control">
-                                <button type="button" aria-label="Decrease rooms" [disabled]="rooms <= 1" (click)="decreaseCount('rooms')">−</button>
-                                <output id="rooms-count">{{ rooms }}</output>
-                                <button type="button" aria-label="Increase rooms" (click)="increaseCount('rooms')">+</button>
-                            </div>
-                        </div>
-
-                        <div class="dropdown-divider"></div>
-
-                        <div class="preference-row">
-                            <span>Traveling with pets?</span>
-                            <button
-                                type="button"
-                                class="toggle-switch"
-                                role="switch"
-                                aria-label="Traveling with pets"
-                                [attr.aria-checked]="travelingWithPets"
-                                [class.is-active]="travelingWithPets"
-                                (click)="travelingWithPets = !travelingWithPets">
-                                <span></span>
-                            </button>
-                        </div>
-
-                        <button type="button" class="done-button" (click)="closeOccupancyDropdown()">Done</button>
-                    </div>
+            <label for="num-guests">Guests</label>
+            <div class="dropdown-container" (click)="$event.stopPropagation()">
+              <button
+                type="button"
+                id="dropdown-btn"
+                aria-haspopup="dialog"
+                [attr.aria-expanded]="occupancyDropdownOpen"
+                (click)="toggleOccupancyDropdown()">
+                <span class="occupancy-trigger-summary">{{ occupancySummary }}</span>
+                <span class="dropdown-chevron" [class.is-open]="occupancyDropdownOpen" aria-hidden="true"></span>
+              </button>
+              <div
+                *ngIf="occupancyDropdownOpen"
+                id="dropdown-contents"
+                role="dialog"
+                aria-label="Guest count">
+                <div class="occupancy-row">
+                  <label for="adults-count">Adults</label>
+                  <div class="counter-control">
+                    <button type="button" aria-label="Decrease adults" [disabled]="adults <= 1" (click)="decreaseCount('adults')">−</button>
+                    <output id="adults-count">{{ adults }}</output>
+                    <button type="button" aria-label="Increase adults" (click)="increaseCount('adults')">+</button>
+                  </div>
                 </div>
-
-                <div id="total-nights-price">
-                    <small id="night-price-calc">RM<span id="price">0</span> ✕ <span id="total-night">1</span> night(s)</small>
-                    <small id="final-price">RM <span id="total-price">0</span></small>
+                <div class="occupancy-row">
+                  <label for="children-count">Children</label>
+                  <div class="counter-control">
+                    <button type="button" aria-label="Decrease children" [disabled]="children <= 0" (click)="decreaseCount('children')">−</button>
+                    <output id="children-count">{{ children }}</output>
+                    <button type="button" aria-label="Increase children" (click)="increaseCount('children')">+</button>
+                  </div>
                 </div>
+                <div class="preference-row">
+                  <span>Traveling with pets?</span>
+                  <button
+                    type="button"
+                    class="toggle-switch"
+                    role="switch"
+                    aria-label="Traveling with pets"
+                    [attr.aria-checked]="travelingWithPets"
+                    [class.is-active]="travelingWithPets"
+                    (click)="travelingWithPets = !travelingWithPets">
+                    <span></span>
+                  </button>
+                </div>
+                <button type="button" class="done-button" (click)="closeOccupancyDropdown()">Done</button>
+              </div>
+            </div>
 
-                <button type="submit" id="continue-booking-btn">Continue to booking</button>
+            <div id="total-nights-price">
+              <small id="night-price-calc">
+                RM {{ selectedRoom.nightlyRate | number:'1.2-2' }} × {{ getNights() }} night(s)
+              </small>
+              <small id="final-price">RM {{ selectedRoom.nightlyRate * getNights() | number:'1.2-2' }}</small>
+            </div>
 
-            </form>
+            <button type="submit" id="continue-booking-btn">Continue to booking</button>
+          </form>
         </div>
-    </div>
+      </div>
+    </ng-container>
   </div>
 </div>

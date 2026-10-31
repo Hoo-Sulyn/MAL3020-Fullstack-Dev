@@ -3,6 +3,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
+const roomRoutes = require('./routes/rooms');
+const bookingRoutes = require('./routes/bookings');
 
 const app = express();
 app.use(cors({ origin: 'http://localhost:4200' }));
@@ -10,6 +12,18 @@ app.use(express.json());
 
 app.get('/', (req, res) => res.send('API is running'));
 app.use('/api/auth', authRoutes);
+app.use('/api/rooms', roomRoutes);
+app.use('/api/bookings', bookingRoutes);
+app.use((req, res) => res.status(404).json({ message: 'The requested API endpoint was not found.' }));
+app.use((error, req, res, next) => {
+  console.error('Request failed:', error.message);
+  if (res.headersSent) {
+    return next(error);
+  }
+  return res.status(error.status || 500).json({
+    message: error.status ? error.message : 'An unexpected server error occurred.',
+  });
+});
 
 async function startServer() {
   if (!process.env.MONGO_URI) {

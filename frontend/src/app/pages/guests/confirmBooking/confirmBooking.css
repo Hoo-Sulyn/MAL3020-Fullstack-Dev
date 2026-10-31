@@ -394,6 +394,15 @@
     transition: all 0.3s ease;
 }
 
+.booking-error{
+    color: #9B5149;
+}
+
+#confirm-booking-btn:disabled{
+    cursor: wait;
+    opacity: 0.65;
+}
+
 #confirm-booking-btn:hover{
     background: #374432;
 }

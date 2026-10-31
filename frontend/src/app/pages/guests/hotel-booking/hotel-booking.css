@@ -358,11 +358,52 @@ form{
 
 .rooms-listing{
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     gap: 20px;
 }
 
+.room-result-card{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    padding: 22px;
+    border: 1px solid #E2E5DD;
+    border-radius: 12px;
+    background: white;
+}
 
+.room-result-details h3,
+.room-result-details p{
+    margin: 0 0 10px;
+}
+
+.room-result-details p,
+.room-result-details small{
+    color: #74796F;
+    font-size: 0.9rem;
+}
+
+.room-result-action{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 14px;
+    white-space: nowrap;
+}
+
+.room-result-action button{
+    border: 0;
+    border-radius: 8px;
+    padding: 12px 18px;
+    background: #52634B;
+    color: white;
+    cursor: pointer;
+}
+
+.booking-error{
+    color: #9B5149;
+}
 
 .room-card{
     border: 1px solid #E2E5DD;
@@ -370,4 +411,16 @@ form{
     flex: 1;
     width: 100%;
     min-width: 350px;
+}
+
+@media (max-width: 700px){
+    .room-result-card{
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .room-result-action{
+        align-items: flex-start;
+        white-space: normal;
+    }
 }

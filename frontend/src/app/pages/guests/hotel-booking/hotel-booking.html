@@ -1,7 +1,7 @@
 <div id="booking-container">
   <div class="main-container">
     <h1>Available rooms at haven</h1>
-    <p style="font-size: 0.9rem; padding-bottom: 10px;">Browse rooms for your chosen dates. Live availability updates are shown as you browse.</p>
+    <p style="font-size: 0.9rem; padding-bottom: 10px;">Choose dates and guest count to search available rooms.</p>
 
     <form [formGroup]="searchForm" (ngSubmit)="onSubmit()">
 
@@ -40,8 +40,7 @@
                     <span class="occupancy-trigger-label">Guests</span>
                     <span class="occupancy-trigger-summary">
                         {{ adults }} {{ adults === 1 ? 'adult' : 'adults' }} ·
-                        {{ children }} {{ children === 1 ? 'child' : 'children' }} ·
-                        {{ rooms }} {{ rooms === 1 ? 'room' : 'rooms' }}
+                        {{ children }} {{ children === 1 ? 'child' : 'children' }}
                     </span>
                 </span>
                 <span class="dropdown-chevron" [class.is-open]="occupancyDropdownOpen" aria-hidden="true"></span>
@@ -50,7 +49,7 @@
                 *ngIf="occupancyDropdownOpen"
                 id="dropdown-contents"
                 role="dialog"
-                aria-label="Guests, rooms, and preferences">
+                aria-label="Guests and preferences">
                 <div class="occupancy-row">
                     <label for="adults-count">Adults</label>
                     <div class="counter-control">
@@ -66,15 +65,6 @@
                         <button type="button" aria-label="Decrease children" [disabled]="children <= 0" (click)="decreaseCount('children')">−</button>
                         <output id="children-count">{{ children }}</output>
                         <button type="button" aria-label="Increase children" (click)="increaseCount('children')">+</button>
-                    </div>
-                </div>
-
-                <div class="occupancy-row">
-                    <label for="rooms-count">Rooms</label>
-                    <div class="counter-control">
-                        <button type="button" aria-label="Decrease rooms" [disabled]="rooms <= 1" (click)="decreaseCount('rooms')">−</button>
-                        <output id="rooms-count">{{ rooms }}</output>
-                        <button type="button" aria-label="Increase rooms" (click)="increaseCount('rooms')">+</button>
                     </div>
                 </div>
 
@@ -99,7 +89,7 @@
         </div>
 
         <!-- Search button -->
-        <button type="submit" class="search-button">
+        <button type="submit" class="search-button" [disabled]="isSearching">
             <img src="search-icon.png" alt="Search icon">
             <p style="font-size:0.85rem; color:white; margin:0;">Search</p>
         </button>
@@ -125,16 +115,33 @@
         <button type="button" id="available-button">Available only <span id="available-check" style="display:none;">✓</span></button>
     </div>
 
-    <h2 style="color: #252B25;">
-        Rooms at haven 
+    <p *ngIf="searchError" class="booking-error" role="alert">{{ searchError }}</p>
+
+    <h2 style="color: #252B25;" *ngIf="hasSearched">
+        Rooms at haven
         <span id="rooms-available-note">
-            <span id="num-rooms-available">0</span>
-             rooms available for
-            <span id="booking-date">Jan 1-2</span>
+            {{ roomResults.length }} rooms available for
+            {{ searchForm.get('check-in')?.value }} → {{ searchForm.get('check-out')?.value }}
         </span>
     </h2>
 
-    <!-- Room Listing Area -->
-    <div class="rooms-listing"></div>
+    <p *ngIf="isSearching" role="status">Searching available rooms…</p>
+    <p *ngIf="hasSearched && !isSearching && !searchError && roomResults.length === 0" role="status">
+        No rooms are available for those dates and guest count.
+    </p>
+    <div class="rooms-listing">
+        <article class="room-result-card" *ngFor="let room of roomResults">
+            <div class="room-result-details">
+                <h3>{{ room.type }}</h3>
+                <p>Room {{ room.number }} · Floor {{ room.floor }}</p>
+                <p>{{ room.description }} • {{ room.amenities }}</p>
+                <small>Up to {{ room.capacity }} guests</small>
+            </div>
+            <div class="room-result-action">
+                <strong>RM {{ room.nightlyRate | number:'1.2-2' }} / night</strong>
+                <button type="button" (click)="viewRoom(room)">View details</button>
+            </div>
+        </article>
+    </div>
   </div>
 </div>

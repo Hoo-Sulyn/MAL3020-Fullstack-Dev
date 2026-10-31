@@ -2,8 +2,10 @@
     <header class="page-header">
         <h1>Bookings management</h1>
         <p>View guest bookings and manage arrivals, departures and cancellations.</p>
-        <small>6 total bookings · {{ formatDate(today) }} · All dates in hotel local time</small>
+        <small>{{ bookings.length }} total bookings · {{ formatDate(today) }} · All dates in hotel local time</small>
     </header>
+
+    <p *ngIf="pageError" class="booking-page-error" role="alert">{{ pageError }}</p>
 
     <div class="booking-management-layout">
         <section class="booking-list" aria-label="Bookings">
@@ -103,7 +105,7 @@
                             <th scope="col">Room</th>
                             <th scope="col">Check-in / Check-out</th>
                             <th scope="col">Status</th>
-                            <th scope="col">USD</th>
+                            <th scope="col">MYR</th>
                             <th scope="col">Actions</th>
                         </tr>
                     </thead>
@@ -136,12 +138,19 @@
                                 <button
                                     type="button"
                                     class="row-action"
+                                    [disabled]="isUpdating"
                                     (click)="handleBookingAction(booking)">
                                     {{ getActionLabel(booking) }}
                                 </button>
                             </td>
                         </tr>
-                        <tr *ngIf="filteredBookings.length === 0">
+                        <tr *ngIf="isLoading">
+                            <td class="empty-state" colspan="6">Loading bookings…</td>
+                        </tr>
+                        <tr *ngIf="!isLoading && !pageError && bookings.length === 0">
+                            <td class="empty-state" colspan="6">No bookings yet.</td>
+                        </tr>
+                        <tr *ngIf="!isLoading && !pageError && bookings.length > 0 && filteredBookings.length === 0">
                             <td class="empty-state" colspan="6">No bookings match the selected filters.</td>
                         </tr>
                     </tbody>
@@ -170,7 +179,8 @@
                 <div class="guest-contact">
                     <a [href]="'mailto:' + booking.email">{{ booking.email }}</a>
                     <a [href]="'tel:' + booking.phone">{{ booking.phone }}</a>
-                    <small>Guest account · {{ booking.adults }} adults</small>
+                    <small>Guest account · {{ booking.adults }} adults · {{ booking.children }} children</small>
+                    <small *ngIf="booking.travelingWithPets">Guest preference: traveling with pets</small>
                 </div>
 
                 <dl class="booking-detail-list">
@@ -191,18 +201,18 @@
                         <dd>{{ formatCurrency(booking.total / getNights(booking)) }} × {{ getNights(booking) }} nights</dd>
                     </div>
                     <div class="detail-total">
-                        <dt>Total · USD</dt>
+                        <dt>Total · MYR</dt>
                         <dd>{{ formatCurrency(booking.total) }}</dd>
                     </div>
                 </dl>
 
                 <div *ngIf="booking.status === 'Confirmed' && canCheckIn(booking)" class="detail-actions">
                     <button type="button" class="primary-action" (click)="handleBookingAction(booking)">Check in guest</button>
-                    <button type="button" class="secondary-action" (click)="openCancelConfirmation()">Cancel booking...</button>
+                    <button *ngIf="canCancel(booking)" type="button" class="secondary-action" (click)="openCancelConfirmation()">Cancel booking...</button>
                 </div>
                 <div *ngIf="booking.status === 'Confirmed' && !canCheckIn(booking)" class="detail-actions">
                     <p class="booking-note">Check-in is available on {{ formatDate(booking.checkIn) }}.</p>
-                    <button type="button" class="secondary-action" (click)="openCancelConfirmation()">Cancel booking...</button>
+                    <button *ngIf="canCancel(booking)" type="button" class="secondary-action" (click)="openCancelConfirmation()">Cancel booking...</button>
                 </div>
                 <div *ngIf="booking.status === 'Checked in'" class="detail-actions">
                     <button type="button" class="primary-action" (click)="handleBookingAction(booking)">Check out guest</button>

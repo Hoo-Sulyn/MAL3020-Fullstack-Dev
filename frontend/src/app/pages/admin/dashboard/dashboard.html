@@ -2,59 +2,51 @@
     <h1>Dashboard</h1>
     <p>Your overview of haven, all in one place.</p>
 
-    <div class="at-a-glance-container">
+    <p *ngIf="pageError" class="dashboard-error" role="alert">{{ pageError }}</p>
+    <p *ngIf="isLoading" class="dashboard-loading" role="status">Loading dashboard data…</p>
 
-        <!-- CURRENT ROOMS BOOKED -->
+    <div class="at-a-glance-container">
         <div class="at-a-glance-cards" id="current-rooms-booked-card">
             <div class="card-title">
                 <small id="current-rooms-booked">Current rooms booked</small>
-                <img src="bed-icon.png" alt="bed">
+                <img src="bed-icon.png" alt="">
             </div>
             <div class="main-contents">
                 <p>
-                    <span class="card-numbers" id="num-booked-rooms">0</span>
-                      of <span id="total-rooms">0</span> rooms
+                    <span class="card-numbers" id="num-booked-rooms">{{ bookedRoomCount }}</span>
+                    of <span id="total-rooms">{{ rooms.length }}</span> rooms
                 </p>
             </div>
             <p class="at-a-glance-footer">
-                <span id="occupancy-percentage">0%</span>
-                 occupancy today
+                <span id="occupancy-percentage">{{ occupancyPercentage }}%</span> occupancy today
             </p>
         </div>
 
-        <!-- MONTHLY REVENUE -->
-        <div class="at-a-glance-cards" id="current-rooms-booked-card">
+        <div class="at-a-glance-cards" id="monthly-revenue-card">
             <div class="card-title">
-                <small id="current-rooms-booked">Monthly revenue</small>
-                <img src="wallet-icon.png" alt="renevue">
+                <small>Monthly revenue</small>
+                <img src="wallet-icon.png" alt="">
             </div>
             <div class="main-contents">
-                <p>
-                    <span class="card-numbers" id="monthly-revenue">RM 0</span>
-                      MYR
-                </p>
+                <p><span class="card-numbers" id="monthly-revenue">{{ formatCurrency(monthlyRevenue) }}</span></p>
             </div>
-            <p class="at-a-glance-footer">
-                <span id="current-month">October</span>
-                 revenue to date
-            </p>
+            <p class="at-a-glance-footer"><span id="current-month">{{ currentMonth }}</span> revenue to date</p>
         </div>
 
-        <!-- ROOM STATUS -->
-        <div class="at-a-glance-cards" id="current-rooms-booked-card">
+        <div class="at-a-glance-cards" id="room-status-card">
             <div class="card-title">
-                <small id="current-rooms-booked">Room status</small>
-                <img src="calendar-icon.png" alt="bed">
+                <small>Room status</small>
+                <img src="calendar-icon.png" alt="">
             </div>
             <div class="main-contents">
                 <p>
-                    <span class="card-numbers" id="num-rooms-available">0</span>
-                      rooms available
+                    <span class="card-numbers" id="num-rooms-available">{{ availableRoomCount }}</span>
+                    rooms available
                 </p>
             </div>
-            <p class="at-a-glance-footer">
-                <span id="occupancy-percentage">0%</span>
-                 occupancy today
+            <p class="at-a-glance-footer room-status-summary">
+                {{ occupiedRoomCount }} occupied <span aria-hidden="true">·</span>
+                {{ maintenanceRoomCount }} in maintenance
             </p>
         </div>
     </div>
@@ -62,26 +54,17 @@
     <div id="today-at-a-glance-container">
         <div id="today-at-a-glance">
             <small style="font-weight: bold;">Today at a glance</small>
-
             <div class="mini-glance-container" id="arrivals">
-                <img src="arrival-icon.png">
-                <small>
-                    <span id="num-arrival">0</span> arrivals
-                </small>
+                <img src="arrival-icon.png" alt="">
+                <small><span id="num-arrival">{{ arrivalsToday }}</span> arrivals</small>
             </div>
-
             <div class="mini-glance-container" id="departure">
-                <img src="departure-icon.png">
-                <small>
-                    <span id="num-departure">0</span> departures
-                </small>
+                <img src="departure-icon.png" alt="">
+                <small><span id="num-departure">{{ departuresToday }}</span> departures</small>
             </div>
-
             <div class="mini-glance-container" id="room-available">
-                <img src="key-icon.png">
-                <small>
-                    <span id="num-room-available">0</span> rooms available
-                </small>
+                <img src="key-icon.png" alt="">
+                <small><span id="num-room-available">{{ availableRoomCount }}</span> rooms available</small>
             </div>
         </div>
         <a class="router-link" id="manage-rooms" routerLink="/roomManagement">Manage rooms →</a>
@@ -90,22 +73,20 @@
     <div id="header-container">
         <div id="header">
             <h2 style="margin:0;">Recent bookings</h2>
-            <small>
-                <span id="total-reservation">0</span> total reservations
-            </small>
+            <small><span id="total-reservation">{{ bookings.length }}</span> total reservations</small>
         </div>
-        <a class="router-link" id="manage-bookings" routerLink="/bookingsManagement">Manage bookings →</a>
+        <a class="router-link" id="manage-bookings" routerLink="/bookingManagement">Manage bookings →</a>
     </div>
 
     <div class="main-container">
         <div id="table-summary">
             <form id="search-bar" (submit)="$event.preventDefault()">
-                <img src="black-search-icon.png" alt="search">
+                <img src="black-search-icon.png" alt="">
                 <input
                     type="search"
                     id="search-place"
-                    placeholder="Search guest or booking ID"
-                    aria-label="Search by guest name or booking ID"
+                    placeholder="Search guest, room or booking ID"
+                    aria-label="Search recent bookings by guest, room or booking ID"
                     [value]="searchQuery"
                     (input)="updateSearchQuery($event)">
             </form>
@@ -121,7 +102,6 @@
                     <span>{{ selectedStatus }}</span>
                     <span class="filter-chevron" [class.is-open]="statusFilterDropdownOpen" aria-hidden="true"></span>
                 </button>
-
                 <div
                     *ngIf="statusFilterDropdownOpen"
                     id="status-filter-options"
@@ -163,19 +143,26 @@
                         <span class="booking-id">{{ booking.bookingId }}</span>
                     </td>
                     <td>{{ booking.room }}</td>
-                    <td>{{ booking.checkIn }}</td>
-                    <td>{{ booking.checkOut }}</td>
-                    <td>{{ booking.status }}</td>
-                    <td>{{ booking.total }}</td>
-                    <td>{{ booking.action }}</td>
+                    <td>{{ formatDate(booking.checkIn) }}</td>
+                    <td>{{ formatDate(booking.checkOut) }}</td>
+                    <td>
+                        <span class="dashboard-booking-status" [ngClass]="'status-' + booking.status.toLowerCase().replace(' ', '-')">
+                            {{ booking.status }}
+                        </span>
+                    </td>
+                    <td>{{ formatCurrency(booking.total) }}</td>
+                    <td>{{ actionForBooking(booking) }}</td>
                 </tr>
-                <tr *ngIf="filteredBookings.length === 0" class="table-contents">
-                    <td colspan="7">No bookings match the selected filters.</td>
+                <tr *ngIf="!isLoading && !pageError && bookings.length === 0" class="table-contents">
+                    <td colspan="7">No bookings yet.</td>
+                </tr>
+                <tr *ngIf="!isLoading && !pageError && bookings.length > 0 && filteredBookings.length === 0" class="table-contents">
+                    <td colspan="7">No recent bookings match the selected filters.</td>
                 </tr>
             </tbody>
         </table>
         <div id="table-footer">
-            <small>Showing top 5 recent reservations</small>
+            Showing {{ filteredBookings.length }} of the top 5 recent reservations
         </div>
     </div>
 </div>

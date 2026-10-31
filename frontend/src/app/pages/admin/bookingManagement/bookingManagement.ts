@@ -1,22 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Booking } from '../../../services/room.service';
+import { RoomService } from '../../../services/room.service';
+import { getHotelDateValue } from '../../../services/date.utils';
 
-type BookingStatus = 'Confirmed' | 'Checked in' | 'Checked out' | 'Cancelled';
+type BookingStatus = Booking['status'];
 type BookingTab = 'all' | 'arrivals' | 'departures';
 type DateFilter = 'All dates' | 'Today' | 'Upcoming' | 'Past';
-
-interface Booking {
-    guestName: string;
-    bookingId: string;
-    room: string;
-    checkIn: string;
-    checkOut: string;
-    status: BookingStatus;
-    total: number;
-    email: string;
-    phone: string;
-    adults: number;
-}
 
 @Component({
     selector: 'app-booking-management',
@@ -25,9 +16,8 @@ interface Booking {
     templateUrl: './bookingManagement.html',
     styleUrl: './bookingManagement.css'
 })
-
-export class BookingManagement {
-    readonly today = '2026-10-16';
+export class BookingManagement implements OnInit {
+    readonly today = getHotelDateValue();
     readonly bookingStatuses: Array<'All statuses' | BookingStatus> = [
         'All statuses',
         'Confirmed',
@@ -43,90 +33,27 @@ export class BookingManagement {
     selectedStatus: 'All statuses' | BookingStatus = 'All statuses';
     selectedDate: DateFilter = 'All dates';
     selectedTab: BookingTab = 'all';
-    selectedBookingId = 'HV-2048';
+    selectedBookingId = '';
     searchQuery = '';
     currentPage = 1;
     cancelConfirmationOpen = false;
+    bookings: Booking[] = [];
+    isLoading = true;
+    pageError = '';
+    isUpdating = false;
 
-    bookings: Booking[] = [
-        {
-            guestName: 'Emma Wilson',
-            bookingId: 'HV-2048',
-            room: '201 · Superior King',
-            checkIn: '2026-10-16',
-            checkOut: '2026-10-19',
-            status: 'Confirmed',
-            total: 444,
-            email: 'emma.wilson@example.com',
-            phone: '+44 7700 900 218',
-            adults: 2
-        },
-        {
-            guestName: 'Lucas Martin',
-            bookingId: 'HV-2047',
-            room: '104 · Garden Suite',
-            checkIn: '2026-10-16',
-            checkOut: '2026-10-18',
-            status: 'Confirmed',
-            total: 252,
-            email: 'lucas.martin@example.com',
-            phone: '+44 7700 900 217',
-            adults: 2
-        },
-        {
-            guestName: 'Olivia Chen',
-            bookingId: 'HV-2046',
-            room: '302 · River View Double',
-            checkIn: '2026-10-14',
-            checkOut: '2026-10-17',
-            status: 'Checked in',
-            total: 516,
-            email: 'olivia.chen@example.com',
-            phone: '+44 7700 900 216',
-            adults: 2
-        },
-        {
-            guestName: 'Noah Williams',
-            bookingId: 'HV-2045',
-            room: '203 · Superior King',
-            checkIn: '2026-10-17',
-            checkOut: '2026-10-20',
-            status: 'Confirmed',
-            total: 444,
-            email: 'noah.williams@example.com',
-            phone: '+44 7700 900 215',
-            adults: 3
-        },
-        {
-            guestName: 'Isabella Rossi',
-            bookingId: 'HV-2044',
-            room: '106 · Classic Double',
-            checkIn: '2026-10-13',
-            checkOut: '2026-10-16',
-            status: 'Checked out',
-            total: 384,
-            email: 'isabella.rossi@example.com',
-            phone: '+44 7700 900 214',
-            adults: 2
-        },
-        {
-            guestName: 'James Taylor',
-            bookingId: 'HV-2043',
-            room: '202 · Superior King',
-            checkIn: '2026-10-18',
-            checkOut: '2026-10-21',
-            status: 'Cancelled',
-            total: 444,
-            email: 'james.taylor@example.com',
-            phone: '+44 7700 900 213',
-            adults: 2
-        }
-    ];
+    constructor(
+        private readonly roomService: RoomService,
+        private readonly changeDetector: ChangeDetectorRef
+    ) {}
+
+    ngOnInit(): void {
+        this.loadBookings();
+    }
 
     get filteredBookings(): Booking[] {
         const query = this.searchQuery.trim().toLowerCase();
-
-        return this.bookings.filter(booking => {
+        return this.bookings.filter((booking) => {
             const matchesSearch = !query
                 || booking.guestName.toLowerCase().includes(query)
                 || booking.bookingId.toLowerCase().includes(query);
@@ -142,16 +69,15 @@ export class BookingManagement {
             const matchesDate = this.selectedDate === 'All dates'
                 || (this.selectedDate === 'Today'
                     && booking.checkIn <= this.today
-                    && booking.checkOut >= this.today)
+                    && booking.checkOut > this.today)
                 || (this.selectedDate === 'Upcoming' && booking.checkIn > this.today)
-                || (this.selectedDate === 'Past' && booking.checkOut < this.today);
-
+                || (this.selectedDate === 'Past' && booking.checkOut <= this.today);
             return matchesSearch && matchesStatus && matchesTab && matchesDate;
         });
     }
 
     get selectedBooking(): Booking | null {
-        return this.filteredBookings.find(booking => booking.bookingId === this.selectedBookingId)
+        return this.filteredBookings.find((booking) => booking.bookingId === this.selectedBookingId)
             ?? this.filteredBookings[0]
             ?? null;
     }
@@ -174,13 +100,13 @@ export class BookingManagement {
     }
 
     get arrivalsToday(): number {
-        return this.bookings.filter(booking =>
+        return this.bookings.filter((booking) =>
             booking.checkIn === this.today && booking.status !== 'Cancelled'
         ).length;
     }
 
     get departuresToday(): number {
-        return this.bookings.filter(booking =>
+        return this.bookings.filter((booking) =>
             booking.checkOut === this.today && booking.status !== 'Cancelled'
         ).length;
     }
@@ -226,7 +152,7 @@ export class BookingManagement {
 
     formatDate(date: string): string {
         const [year, month, day] = date.split('-').map(Number);
-        return new Intl.DateTimeFormat('en-US', {
+        return new Intl.DateTimeFormat('en-MY', {
             month: 'short',
             day: 'numeric',
             year: 'numeric'
@@ -235,30 +161,34 @@ export class BookingManagement {
 
     formatShortDate(date: string): string {
         const [year, month, day] = date.split('-').map(Number);
-        return new Intl.DateTimeFormat('en-US', {
+        return new Intl.DateTimeFormat('en-MY', {
             month: 'short',
             day: 'numeric'
         }).format(new Date(year, month - 1, day));
     }
 
     formatCurrency(amount: number): string {
-        return new Intl.NumberFormat('en-US', {
+        return new Intl.NumberFormat('en-MY', {
             style: 'currency',
-            currency: 'USD',
-            maximumFractionDigits: 0
+            currency: 'MYR',
+            maximumFractionDigits: 2
         }).format(amount);
     }
 
     getNights(booking: Booking): number {
-        const [checkInYear, checkInMonth, checkInDay] = booking.checkIn.split('-').map(Number);
-        const [checkOutYear, checkOutMonth, checkOutDay] = booking.checkOut.split('-').map(Number);
-        const checkInTime = Date.UTC(checkInYear, checkInMonth - 1, checkInDay);
-        const checkOutTime = Date.UTC(checkOutYear, checkOutMonth - 1, checkOutDay);
+        const checkInTime = Date.parse(`${booking.checkIn}T00:00:00Z`);
+        const checkOutTime = Date.parse(`${booking.checkOut}T00:00:00Z`);
         return (checkOutTime - checkInTime) / 86_400_000;
     }
 
     canCheckIn(booking: Booking): boolean {
-        return booking.status === 'Confirmed' && booking.checkIn <= this.today;
+        return booking.status === 'Confirmed'
+            && booking.checkIn <= this.today
+            && booking.checkOut > this.today;
+    }
+
+    canCancel(booking: Booking): boolean {
+        return booking.status === 'Confirmed' && booking.checkIn > this.today;
     }
 
     getActionLabel(booking: Booking): string {
@@ -269,13 +199,12 @@ export class BookingManagement {
     }
 
     handleBookingAction(booking: Booking): void {
-        this.selectBooking(booking);
-
-        if (this.canCheckIn(booking)) {
-            booking.status = 'Checked in';
-        } else if (booking.status === 'Checked in') {
-            booking.status = 'Checked out';
+        if (!this.canCheckIn(booking) && booking.status !== 'Checked in') {
+            this.selectBooking(booking);
+            return;
         }
+        const status = booking.status === 'Checked in' ? 'Checked out' : 'Checked in';
+        this.updateStatus(booking, status);
     }
 
     openCancelConfirmation(): void {
@@ -287,7 +216,7 @@ export class BookingManagement {
     }
 
     confirmCancellation(booking: Booking): void {
-        booking.status = 'Cancelled';
+        this.updateStatus(booking, 'Cancelled');
         this.cancelConfirmationOpen = false;
     }
 
@@ -307,6 +236,56 @@ export class BookingManagement {
     closeFilterDropdowns(): void {
         this.statusFilterDropdownOpen = false;
         this.dateFilterDropdownOpen = false;
+    }
+
+    private loadBookings(): void {
+        this.isLoading = true;
+        this.pageError = '';
+        this.roomService.getAdminBookings().subscribe({
+            next: (bookings) => {
+                this.bookings = bookings;
+                this.selectedBookingId = bookings[0]?.bookingId || '';
+                this.isLoading = false;
+                this.changeDetector.markForCheck();
+            },
+            error: (error: unknown) => {
+                this.pageError = this.errorMessage(error, 'Unable to load bookings.');
+                this.isLoading = false;
+                this.changeDetector.markForCheck();
+            },
+        });
+    }
+
+    private updateStatus(booking: Booking, status: 'Checked in' | 'Checked out' | 'Cancelled'): void {
+        this.isUpdating = true;
+        this.pageError = '';
+        this.roomService.updateBookingStatus(booking.id, status).subscribe({
+            next: (updatedBooking) => {
+                this.bookings = this.bookings.map((item) =>
+                    item.id === updatedBooking.id ? updatedBooking : item
+                );
+                this.selectedBookingId = updatedBooking.bookingId;
+                this.isUpdating = false;
+                this.changeDetector.markForCheck();
+            },
+            error: (error: unknown) => {
+                this.pageError = this.errorMessage(error, 'Unable to update this booking.');
+                this.isUpdating = false;
+                this.changeDetector.markForCheck();
+            },
+        });
+    }
+
+    private errorMessage(error: unknown, fallback: string): string {
+        if (error instanceof HttpErrorResponse) {
+            if (typeof error.error?.message === 'string') {
+                return error.error.message;
+            }
+            if (error.status === 0) {
+                return 'Cannot reach the server. Check that the backend is running.';
+            }
+        }
+        return fallback;
     }
 
     private resetPage(): void {

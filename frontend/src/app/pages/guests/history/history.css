@@ -14,6 +14,14 @@
     margin: 25px 0;
 }
 
+.booking-success{
+    color: #52634B !important;
+}
+
+.booking-error{
+    color: #9B5149 !important;
+}
+
 .main-container{
     display: flex;
     gap: 30px;
@@ -63,6 +71,20 @@
 .booking-details > small{
     color: #74796F;
     font-size: 0.8rem;
+}
+
+.history-empty{
+    margin: 20px 0 0;
+    color: #74796F;
+    font-size: 0.9rem;
+}
+
+.history-cancel-button{
+    border: 0;
+    background: transparent;
+    color: #9B5149;
+    cursor: pointer;
+    font: inherit;
 }
 
 #booking-status{
@@ -156,6 +178,11 @@
 
 #cancel-booking-btn:hover{
     background-color: red;
+}
+
+#cancel-booking-btn:disabled{
+    cursor: wait;
+    opacity: 0.65;
 }
 
 .cancellation-note{

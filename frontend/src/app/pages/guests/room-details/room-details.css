@@ -324,6 +324,15 @@
     transition: all 0.3s ease;
 }
 
+.booking-error{
+    color: #9B5149;
+}
+
+#continue-booking-btn:disabled{
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
 #continue-booking-btn:hover{
     background-color: #374432;
 }
