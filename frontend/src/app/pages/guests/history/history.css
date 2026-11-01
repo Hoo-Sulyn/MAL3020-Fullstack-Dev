@@ -87,6 +87,21 @@
     font: inherit;
 }
 
+.history-details-button{
+    border: 0;
+    background: transparent;
+    color: #52634B;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.history-details-button:hover{
+    color: #374432;
+    text-decoration: underline;
+}
+
 #booking-status{
     border: 1px solid transparent;
     border-radius: 4px;

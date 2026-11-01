@@ -2,17 +2,21 @@
     <h1>Your profile</h1>
     <p>View and update the details you use for your stays at haven.</p>
 
-    <div class="main-container">
+    <p *ngIf="isLoading" class="profile-status" role="status">Loading your profile…</p>
+    <p *ngIf="errorMessage" class="profile-error" role="alert">{{ errorMessage }}</p>
+    <p *ngIf="successMessage" class="profile-success" role="status">{{ successMessage }}</p>
+
+    <div *ngIf="!isLoading && user" class="main-container">
         <div id="guest-profile-container">
             <div class="card-container" id="preview-card">
-                <div id="guest-profile-pic">
-                    <p id="guest-initials">EW</p>
+                <div id="guest-profile-pic" aria-hidden="true">
+                    <p id="guest-initials">{{ guestInitials }}</p>
                 </div>
                 <div id="guest-name-email-container">
-                    <p id="guest-name">Guest Name</p>
+                    <p id="guest-name">{{ guestName }}</p>
                     <small id="guest-email-account">
-                        <span id="guest-email">guest@email.com</span>
-                         • Guest account
+                        <span id="guest-email">{{ profileForm.get('email')?.value }}</span>
+                        · Guest account
                     </small>
                 </div>
             </div>
@@ -20,42 +24,75 @@
             <div class="card-container" id="personal-details">
                 <h2>Personal details</h2>
 
-                <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+                <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" novalidate>
                     <div class="form-row">
-
-                        <!-- FIRST NAME -->
                         <div class="form-group">
                             <label for="first-name">First name</label>
-                            <input type="text" id="first-name" formControlName="firstName" placeholder="First Name">
+                            <input type="text" id="first-name" formControlName="firstName" autocomplete="given-name" [attr.aria-invalid]="profileForm.get('firstName')?.touched && profileForm.get('firstName')?.invalid">
+                            <small *ngIf="profileForm.get('firstName')?.touched && profileForm.get('firstName')?.invalid" class="field-error">
+                                Enter a first name between 2 and 50 characters.
+                            </small>
                         </div>
 
-                        <!-- LAST NAME -->
                         <div class="form-group">
-                            <label for="first-name">Last name</label>
-                            <input type="text" id="last-name" formControlName="lastName" placeholder="Last Name">
+                            <label for="last-name">Last name</label>
+                            <input type="text" id="last-name" formControlName="lastName" autocomplete="family-name" [attr.aria-invalid]="profileForm.get('lastName')?.touched && profileForm.get('lastName')?.invalid">
+                            <small *ngIf="profileForm.get('lastName')?.touched && profileForm.get('lastName')?.invalid" class="field-error">
+                                Enter a last name between 2 and 50 characters.
+                            </small>
                         </div>
                     </div>
 
-                    <!-- EMAIL -->
                     <div class="form-group">
                         <label for="email">Email address</label>
-                        <input type="email" id="email" formControlName="email" placeholder="example@email.com">
-                        <small class="hint">Use a valid email address that is not already in use.</small>
+                        <input type="email" id="email" formControlName="email" autocomplete="email" [attr.aria-invalid]="profileForm.get('email')?.touched && profileForm.get('email')?.invalid">
+                        <small *ngIf="profileForm.get('email')?.touched && profileForm.get('email')?.invalid" class="field-error">
+                            Enter a valid email address.
+                        </small>
+                        <small class="hint">Changing your email also updates it on your existing bookings.</small>
                     </div>
 
-                    <!-- PHONE NUM -->
                     <div class="form-group">
-                        <label for="phone">Phone number</label>
-                        <input type="tel" id="phone-num" formControlName="phoneNum" placeholder="+00 123456789">
-                        <small class="hint">Include your country code.</small>
+                        <label for="phone-num">Phone number</label>
+                        <input type="tel" id="phone-num" formControlName="phoneNum" autocomplete="tel" placeholder="+00 123456789" [attr.aria-invalid]="profileForm.get('phoneNum')?.touched && profileForm.get('phoneNum')?.invalid">
+                        <small *ngIf="profileForm.get('phoneNum')?.touched && profileForm.get('phoneNum')?.invalid" class="field-error">
+                            Enter a valid phone number with country code.
+                        </small>
                     </div>
 
                     <div class="divider"></div>
-
                     <div class="buttons-container">
-                        <button type="submit" id="save-changes">Save changes</button>
-                        <button type="button" id="cancel-changes">Cancel changes</button>
+                        <button type="submit" id="save-changes" [disabled]="isSavingProfile || !profileForm.dirty">
+                            {{ isSavingProfile ? 'Saving…' : 'Save changes' }}
+                        </button>
+                        <button type="button" id="cancel-changes" [disabled]="isSavingProfile || !profileForm.dirty" (click)="cancelChanges()">Cancel changes</button>
                     </div>
+                </form>
+            </div>
+
+            <div class="card-container" id="password-details">
+                <h2>Change password</h2>
+                <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" novalidate>
+                    <div class="form-group">
+                        <label for="current-password">Current password</label>
+                        <input type="password" id="current-password" formControlName="currentPassword" autocomplete="current-password" [attr.aria-invalid]="passwordForm.get('currentPassword')?.touched && passwordForm.get('currentPassword')?.invalid">
+                        <small *ngIf="passwordForm.get('currentPassword')?.touched && passwordForm.get('currentPassword')?.invalid" class="field-error">Enter your current password.</small>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="new-password">New password</label>
+                            <input type="password" id="new-password" formControlName="newPassword" autocomplete="new-password" [attr.aria-invalid]="passwordForm.get('newPassword')?.touched && passwordForm.get('newPassword')?.invalid">
+                            <small *ngIf="passwordForm.get('newPassword')?.touched && passwordForm.get('newPassword')?.invalid" class="field-error">Use at least 8 characters.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm-password">Confirm new password</label>
+                            <input type="password" id="confirm-password" formControlName="confirmPassword" autocomplete="new-password" [attr.aria-invalid]="passwordMismatch">
+                            <small *ngIf="passwordMismatch" class="field-error">Passwords do not match.</small>
+                        </div>
+                    </div>
+                    <button type="submit" id="change-password-btn" [disabled]="isChangingPassword">
+                        {{ isChangingPassword ? 'Changing…' : 'Change password' }}
+                    </button>
                 </form>
             </div>
         </div>
@@ -63,23 +100,22 @@
         <div id="delete-acc-confirmation-container">
             <div class="card-container" id="delete-account-container">
                 <h3>Delete account</h3>
-                <p>Permanently remove your guest account and personal details. This cannot be undone.</p>
-
-                <button type="button" id="delete-acc-btn">Delete account</button>
+                <p>Permanently remove your guest account and personal details. Your saved booking records will remain. This cannot be undone.</p>
+                <button type="button" id="delete-acc-btn" (click)="beginDeleteAccount()">Delete account</button>
             </div>
 
-            <div class="card-container" id="delete-confirmation-container">
+            <div *ngIf="showDeleteConfirmation" class="card-container" id="delete-confirmation-container">
                 <small id="highlighted-note">Deletion confirmation</small>
                 <h3>This is permanent.</h3>
-
                 <div id="delete-note">
                     <p id="delete-header">Before you delete</p>
-                    <small id="delete-desc">You will be signed out and will no longer be able to access your profile or booking history. Your personal details will be permanently removed.</small>
+                    <small id="delete-desc">You will be signed out and will no longer be able to access your profile or booking history. Existing booking records will be retained.</small>
                 </div>
-
                 <div class="buttons-container">
-                    <button type="button" id="keep-acc">Keep account</button>
-                    <button type="button" id="delete-acc">Delete account</button>
+                    <button type="button" id="keep-acc" (click)="cancelDeleteAccount()" [disabled]="isDeletingAccount">Keep account</button>
+                    <button type="button" id="delete-acc" (click)="deleteAccount()" [disabled]="isDeletingAccount">
+                        {{ isDeletingAccount ? 'Deleting…' : 'Delete account' }}
+                    </button>
                 </div>
             </div>
         </div>

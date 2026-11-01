@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
 import { Booking } from '../../../services/room.service';
 import { RoomService } from '../../../services/room.service';
 import { getHotelDateValue } from '../../../services/date.utils';
@@ -44,6 +45,7 @@ export class BookingManagement implements OnInit {
 
     constructor(
         private readonly roomService: RoomService,
+        private readonly route: ActivatedRoute,
         private readonly changeDetector: ChangeDetectorRef
     ) {}
 
@@ -150,6 +152,14 @@ export class BookingManagement implements OnInit {
         this.cancelConfirmationOpen = false;
     }
 
+    selectBookingFromRow(event: Event, booking: Booking): void {
+        if (event.target !== event.currentTarget) {
+            return;
+        }
+        event.preventDefault();
+        this.selectBooking(booking);
+    }
+
     formatDate(date: string): string {
         const [year, month, day] = date.split('-').map(Number);
         return new Intl.DateTimeFormat('en-MY', {
@@ -244,7 +254,16 @@ export class BookingManagement implements OnInit {
         this.roomService.getAdminBookings().subscribe({
             next: (bookings) => {
                 this.bookings = bookings;
-                this.selectedBookingId = bookings[0]?.bookingId || '';
+                const requestedBookingId = this.route.snapshot.queryParamMap.get('booking');
+                const requestedIndex = requestedBookingId
+                    ? bookings.findIndex((booking) => booking.bookingId === requestedBookingId)
+                    : -1;
+                if (requestedIndex >= 0) {
+                    this.selectedBookingId = bookings[requestedIndex].bookingId;
+                    this.currentPage = Math.floor(requestedIndex / this.pageSize) + 1;
+                } else {
+                    this.selectedBookingId = bookings[0]?.bookingId || '';
+                }
                 this.isLoading = false;
                 this.changeDetector.markForCheck();
             },

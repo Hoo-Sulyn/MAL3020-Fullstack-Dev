@@ -1,7 +1,7 @@
 <div id="booking-container">
   <div class="main-container">
     <h1>Available rooms at haven</h1>
-    <p style="font-size: 0.9rem; padding-bottom: 10px;">Choose dates and guest count to search available rooms.</p>
+    <p style="font-size: 0.9rem; padding-bottom: 10px;">Browse all rooms, or choose dates and guest count to check availability for your stay.</p>
 
     <form [formGroup]="searchForm" (ngSubmit)="onSubmit()">
 
@@ -10,7 +10,7 @@
             <img src="calendar-icon.png" alt="Calendar icon">
             <div class="field-container">
                 <label for="check-in">Check-in</label>
-                <input type="date" id="check-in" formControlName="check-in">
+                <input type="date" id="check-in" formControlName="check-in" [min]="today" (change)="onCheckInChange()">
             </div>
         </div>
 
@@ -21,7 +21,7 @@
             <img src="calendar-icon.png" alt="Calendar icon">
             <div class="field-container">
                 <label for="check-out">Check-out</label>
-                <input type="date" id="check-out" formControlName="check-out">
+                <input type="date" id="check-out" formControlName="check-out" [min]="checkOutMin">
             </div>
         </div>
 
@@ -96,52 +96,58 @@
     </form>
 
     <!-- Filter Dropdown -->
-    <div class="filter-container">
-        <select name="room-type" id="room-type">
-            <option name="room-type" hidden>Room type</option>
-            <option name="superior-king">Superior King</option>
-            <option name="garden-suite">Garden Suite</option>
-            <option name="river-view-double">River View Double</option>
+    <div class="filter-container" aria-label="Filter rooms">
+        <select
+            name="room-type"
+            id="room-type"
+            aria-label="Filter by room type"
+            [value]="selectedRoomType"
+            (change)="updateRoomType($event)">
+            <option value="">All room types</option>
+            <option value="Superior King">Superior King</option>
+            <option value="Garden Suite">Garden Suite</option>
+            <option value="River View Double">River View Double</option>
         </select>
 
-        <select name="guest-rating" id="guest-rating">
-            <option name="guest-rating" hidden>Guest rating</option>
-            <option name="exceptional">Exceptional (9.0+)</option>
-            <option name="wonderful">Wonderful (8.0+)</option>
-            <option name="very-good">Very Good (7.0+)</option>
-            <option name="pleasant">Pleasant (6.0+)</option>
-        </select>
-
-        <button type="button" id="available-button">Available only <span id="available-check" style="display:none;">✓</span></button>
+        <button
+            type="button"
+            id="available-button"
+            [attr.aria-pressed]="availableOnly"
+            [class.is-selected]="availableOnly"
+            (click)="toggleAvailableOnly()">
+            Available only
+            <span id="available-check" [class.is-visible]="availableOnly" aria-hidden="true">✓</span>
+        </button>
     </div>
 
     <p *ngIf="searchError" class="booking-error" role="alert">{{ searchError }}</p>
 
-    <h2 style="color: #252B25;" *ngIf="hasSearched">
+    <h2 style="color: #252B25;">
         Rooms at haven
         <span id="rooms-available-note">
-            {{ roomResults.length }} rooms available for
-            {{ searchForm.get('check-in')?.value }} → {{ searchForm.get('check-out')?.value }}
+            {{ filteredRoomResults.length }} rooms shown
+            <ng-container *ngIf="hasSearched">
+                for {{ searchForm.get('check-in')?.value }} → {{ searchForm.get('check-out')?.value }}
+            </ng-container>
         </span>
     </h2>
 
+    <p *ngIf="isLoadingRooms" role="status">Loading rooms…</p>
     <p *ngIf="isSearching" role="status">Searching available rooms…</p>
-    <p *ngIf="hasSearched && !isSearching && !searchError && roomResults.length === 0" role="status">
-        No rooms are available for those dates and guest count.
+    <p *ngIf="!isLoadingRooms && !isSearching && !searchError && roomResults.length === 0" role="status">
+        No rooms are available right now.
+    </p>
+    <p *ngIf="!isLoadingRooms && !isSearching && !searchError && roomResults.length > 0 && filteredRoomResults.length === 0" role="status">
+        No rooms match the selected filters.
     </p>
     <div class="rooms-listing">
-        <article class="room-result-card" *ngFor="let room of roomResults">
-            <div class="room-result-details">
-                <h3>{{ room.type }}</h3>
-                <p>Room {{ room.number }} · Floor {{ room.floor }}</p>
-                <p>{{ room.description }} • {{ room.amenities }}</p>
-                <small>Up to {{ room.capacity }} guests</small>
-            </div>
-            <div class="room-result-action">
-                <strong>RM {{ room.nightlyRate | number:'1.2-2' }} / night</strong>
-                <button type="button" (click)="viewRoom(room)">View details</button>
-            </div>
-        </article>
+        <app-room-card
+            *ngFor="let room of filteredRoomResults"
+            [room]="room"
+            [checkIn]="searchForm.get('check-in')?.value || ''"
+            [checkOut]="searchForm.get('check-out')?.value || ''"
+            (viewDetails)="viewRoom($event)">
+        </app-room-card>
     </div>
   </div>
 </div>

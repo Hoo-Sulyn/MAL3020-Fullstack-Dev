@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../services/auth.service';
 import { Booking, RoomService } from '../../../services/room.service';
 import { getHotelDateValue } from '../../../services/date.utils';
+import { getRoomImage } from '../../../services/room-image.utils';
 
 @Component({
     selector: 'app-history',
@@ -30,20 +31,24 @@ export class History implements OnInit {
         private readonly roomService: RoomService,
         private readonly auth: AuthService,
         private readonly route: ActivatedRoute,
+        private readonly router: Router,
         private readonly changeDetector: ChangeDetectorRef
     ) {}
 
     get currentAndUpcomingBookings(): Booking[] {
         const today = getHotelDateValue();
         return this.bookings.filter((booking) =>
-            booking.status !== 'Cancelled' && booking.checkOut > today
+            booking.status !== 'Cancelled'
+            && booking.status !== 'Checked out'
+            && booking.checkOut > today
         );
     }
 
     get pastBookings(): Booking[] {
         const today = getHotelDateValue();
         return this.bookings.filter((booking) =>
-            booking.status !== 'Cancelled' && booking.checkOut <= today
+            booking.status !== 'Cancelled'
+            && (booking.status === 'Checked out' || booking.checkOut <= today)
         );
     }
 
@@ -90,6 +95,25 @@ export class History implements OnInit {
 
     keepBooking(): void {
         this.selectedBooking = null;
+    }
+
+    showBookingDetails(booking: Booking): void {
+        void this.router.navigate(['/roomDetails'], {
+            queryParams: {
+                id: booking.roomId,
+                image: getRoomImage(booking.roomType),
+                checkIn: booking.checkIn,
+                checkOut: booking.checkOut,
+                adults: booking.adults,
+                children: booking.children,
+                travelingWithPets: booking.travelingWithPets,
+                fromHistory: true,
+                bookingId: booking.bookingId,
+                bookingStatus: booking.status,
+                bookingTotal: booking.total,
+                nightlyRate: booking.nightlyRate,
+            },
+        });
     }
 
     confirmCancellation(): void {

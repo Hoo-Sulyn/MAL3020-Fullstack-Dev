@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { Booking, Room, RoomService } from '../../../services/room.service';
 import { getHotelDateValue } from '../../../services/date.utils';
@@ -11,7 +11,7 @@ type DashboardBookingStatus = 'All statuses' | Booking['status'];
 @Component({
     selector: 'app-dashboard',
     standalone: true,
-    imports: [CommonModule, RouterLink],
+    imports: [CommonModule],
     templateUrl: './dashboard.html',
     styleUrl: './dashboard.css'
 })
@@ -39,6 +39,7 @@ export class Dashboard implements OnInit {
 
     constructor(
         private readonly roomService: RoomService,
+        private readonly router: Router,
         private readonly changeDetector: ChangeDetectorRef
     ) {}
 
@@ -135,14 +136,10 @@ export class Dashboard implements OnInit {
         });
     }
 
-    actionForBooking(booking: Booking): string {
-        if (booking.status === 'Confirmed' && booking.checkIn <= this.today && booking.checkOut > this.today) {
-            return 'Check in';
-        }
-        if (booking.status === 'Checked in') {
-            return 'Check out';
-        }
-        return 'View details';
+    viewBookingDetails(booking: Booking): void {
+        void this.router.navigate(['/bookingManagement'], {
+            queryParams: { booking: booking.bookingId }
+        });
     }
 
     updateSearchQuery(event: Event): void {

@@ -151,7 +151,11 @@
                         </span>
                     </td>
                     <td>{{ formatCurrency(booking.total) }}</td>
-                    <td>{{ actionForBooking(booking) }}</td>
+                    <td>
+                        <button type="button" class="dashboard-booking-action" (click)="viewBookingDetails(booking)">
+                            View details
+                        </button>
+                    </td>
                 </tr>
                 <tr *ngIf="!isLoading && !pageError && bookings.length === 0" class="table-contents">
                     <td colspan="7">No bookings yet.</td>

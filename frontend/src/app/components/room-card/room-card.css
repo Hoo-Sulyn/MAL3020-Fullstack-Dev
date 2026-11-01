@@ -1,3 +1,12 @@
+.room-card{
+    width: 100%;
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+    border: 1px solid #E2E5DD;
+    border-radius: 12px;
+}
+
 .room-card #room-image-container {
     height: 200px;
     overflow: hidden;
@@ -7,7 +16,7 @@
     display: block;
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
 }
 
 .room-detail{
@@ -23,21 +32,6 @@
 
 #listing-room-type{
     margin-bottom: 5px;
-}
-
-.room-rating-reviews{
-    margin: 10px 0;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-#room-rating{
-    background-color: #dedede;
-    padding: 7px;
-    border-radius: 4px;
-    font-weight: bold;
-    color: #4f4f4f;
 }
 
 .divider{
@@ -75,8 +69,4 @@
 
 #view-details-btn:hover{
     background-color: #384732;
-}
-
-#listing-room-type, #room-description, .room-rating-reviews, #room-amenities, #room-pricing p{
-    background-color: #dedede;
 }

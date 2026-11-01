@@ -4,7 +4,8 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Room, RoomService } from '../../../services/room.service';
-import { getHotelDateValue } from '../../../services/date.utils';
+import { getHotelDateValue, getNextDateValue, hotelDateRangeValidator } from '../../../services/date.utils';
+import { getRoomImage } from '../../../services/room-image.utils';
 
 @Component({
     selector: 'app-room-details',
@@ -14,12 +15,19 @@ import { getHotelDateValue } from '../../../services/date.utils';
     styleUrl: './room-details.css'
 })
 export class RoomDetails implements OnInit {
+    readonly today = getHotelDateValue();
     bookingForm: FormGroup;
     occupancyDropdownOpen = false;
     adults = 1;
     children = 0;
     travelingWithPets = false;
     room: Room | null = null;
+    roomImage = 'image-not-available.png';
+    isHistoryView = false;
+    bookingId = '';
+    bookingStatus = '';
+    bookingTotal: number | null = null;
+    bookingNightlyRate: number | null = null;
     isLoading = true;
     errorMessage = '';
 
@@ -33,7 +41,12 @@ export class RoomDetails implements OnInit {
         this.bookingForm = this.fb.group({
             'check-in-date': ['', Validators.required],
             'check-out-date': ['', Validators.required]
-        });
+        }, { validators: hotelDateRangeValidator('check-in-date', 'check-out-date') });
+    }
+
+    get checkOutMin(): string {
+        const checkIn = this.bookingForm.get('check-in-date')?.value as string;
+        return checkIn ? getNextDateValue(checkIn) : this.today;
     }
 
     get occupancySummary(): string {
@@ -42,9 +55,27 @@ export class RoomDetails implements OnInit {
         return `${this.adults} ${adultLabel} · ${this.children} ${childLabel}`;
     }
 
+    get displayedNightlyRate(): number {
+        return this.isHistoryView && this.bookingNightlyRate !== null
+            ? this.bookingNightlyRate
+            : this.room?.nightlyRate ?? 0;
+    }
+
+    get displayedTotal(): number {
+        return this.isHistoryView && this.bookingTotal !== null
+            ? this.bookingTotal
+            : this.displayedNightlyRate * this.getNights();
+    }
+
     ngOnInit(): void {
         const params = this.route.snapshot.queryParamMap;
         const roomId = params.get('id');
+        const passedImage = params.get('image');
+        this.isHistoryView = params.get('fromHistory') === 'true';
+        this.bookingId = this.isHistoryView ? params.get('bookingId') || '' : '';
+        this.bookingStatus = this.isHistoryView ? params.get('bookingStatus') || '' : '';
+        this.bookingTotal = this.readAmount(params.get('bookingTotal'));
+        this.bookingNightlyRate = this.readAmount(params.get('nightlyRate'));
         this.bookingForm.patchValue({
             'check-in-date': params.get('checkIn') || '',
             'check-out-date': params.get('checkOut') || '',
@@ -62,6 +93,8 @@ export class RoomDetails implements OnInit {
         this.roomService.getRoom(roomId).subscribe({
             next: (room) => {
                 this.room = room;
+                const expectedImage = getRoomImage(room.type);
+                this.roomImage = passedImage === expectedImage ? passedImage : expectedImage;
                 this.isLoading = false;
                 this.changeDetector.markForCheck();
             },
@@ -98,8 +131,19 @@ export class RoomDetails implements OnInit {
     }
 
     onSubmit(): void {
-        if (!this.room || this.bookingForm.invalid) {
+        if (this.isHistoryView) {
+            return;
+        }
+        if (this.bookingForm.invalid) {
             this.bookingForm.markAllAsTouched();
+            this.errorMessage = this.bookingForm.hasError('checkInInPast')
+                ? 'Check-in must be today or later.'
+                : this.bookingForm.hasError('checkOutNotAfterCheckIn')
+                    ? 'Check-out must be after check-in.'
+                    : '';
+            return;
+        }
+        if (!this.room) {
             return;
         }
         const checkIn = this.bookingForm.get('check-in-date')?.value as string;
@@ -124,6 +168,28 @@ export class RoomDetails implements OnInit {
                 travelingWithPets: this.travelingWithPets,
             },
         });
+    }
+
+    backToHistory(): void {
+        void this.router.navigateByUrl('/history');
+    }
+
+    private readAmount(value: string | null): number | null {
+        if (!value) {
+            return null;
+        }
+        const amount = Number(value);
+        return Number.isFinite(amount) && amount >= 0 ? amount : null;
+    }
+
+    onCheckInChange(): void {
+        const checkIn = this.bookingForm.get('check-in-date')?.value as string;
+        const checkOutControl = this.bookingForm.get('check-out-date');
+        const checkOut = checkOutControl?.value as string;
+        if (checkIn && checkOut && checkOut <= checkIn) {
+            checkOutControl?.setValue('');
+        }
+        this.errorMessage = '';
     }
 
     getNights(): number {

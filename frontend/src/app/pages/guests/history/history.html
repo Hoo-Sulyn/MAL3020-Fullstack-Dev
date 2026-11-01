@@ -29,7 +29,7 @@
                         <button *ngIf="canCancel(booking)" type="button" class="history-cancel-button" (click)="openCancellation(booking)">
                             Cancel booking
                         </button>
-                        <span *ngIf="!canCancel(booking)">Stay details</span>
+                        <button type="button" class="history-details-button" (click)="showBookingDetails(booking)">Show details</button>
                     </div>
                 </article>
                 <p *ngIf="!isLoading && !errorMessage && currentAndUpcomingBookings.length === 0" class="history-empty">No current or upcoming bookings.</p>
@@ -50,6 +50,9 @@
                         <p>{{ booking.status }}</p>
                         <small>RM {{ booking.total | number:'1.2-2' }}</small>
                     </div>
+                    <div class="booking-details">
+                        <button type="button" class="history-details-button" (click)="showBookingDetails(booking)">Show details</button>
+                    </div>
                 </article>
                 <p *ngIf="!isLoading && !errorMessage && pastBookings.length === 0" class="history-empty">No past bookings.</p>
             </section>
@@ -68,6 +71,9 @@
                     <div class="booking-details">
                         <p>{{ booking.status }}</p>
                         <small>RM {{ booking.total | number:'1.2-2' }}</small>
+                    </div>
+                    <div class="booking-details">
+                        <button type="button" class="history-details-button" (click)="showBookingDetails(booking)">Show details</button>
                     </div>
                 </article>
                 <p *ngIf="!isLoading && !errorMessage && cancelledBookings.length === 0" class="history-empty">No cancelled bookings.</p>

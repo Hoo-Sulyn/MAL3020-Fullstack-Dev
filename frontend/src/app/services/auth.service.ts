@@ -1,6 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, tap } from 'rxjs';
+import { RealtimeService } from './realtime.service';
 
 export type AuthRole = 'guest' | 'admin';
 
@@ -26,9 +27,13 @@ interface RegisterResponse {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly apiUrl = 'http://localhost:3000/api/auth';
+  private readonly profileUrl = 'http://localhost:3000/api/profile';
   private readonly sessionKey = 'haven_session';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly realtime: RealtimeService
+  ) {}
 
   register(payload: {
     firstName: string;
@@ -44,6 +49,46 @@ export class AuthService {
     return this.http
       .post<AuthResponse>(`${this.apiUrl}/login`, { email, password, role })
       .pipe(tap((response) => localStorage.setItem(this.sessionKey, JSON.stringify(response))));
+  }
+
+  getProfile(): Observable<AuthUser> {
+    return this.http.get<AuthUser>(this.profileUrl, {
+      headers: this.authHeaders(),
+    });
+  }
+
+  updateProfile(profile: Pick<AuthUser, 'firstName' | 'lastName' | 'email' | 'phone'>): Observable<AuthUser> {
+    return this.http.put<AuthUser>(this.profileUrl, profile, {
+      headers: this.authHeaders(),
+    });
+  }
+
+  changePassword(currentPassword: string, newPassword: string): Observable<void> {
+    return this.http.put<void>(
+      `${this.profileUrl}/password`,
+      { currentPassword, newPassword },
+      { headers: this.authHeaders() }
+    );
+  }
+
+  deleteAccount(): Observable<void> {
+    return this.http.delete<void>(`${this.profileUrl}/account`, {
+      headers: this.authHeaders(),
+    });
+  }
+
+  updateCachedUser(user: AuthUser): void {
+    const storedSession = localStorage.getItem(this.sessionKey);
+    if (!storedSession) {
+      return;
+    }
+
+    try {
+      const session = JSON.parse(storedSession) as AuthResponse;
+      localStorage.setItem(this.sessionKey, JSON.stringify({ ...session, user }));
+    } catch (error) {
+      console.error('Unable to update saved user session:', error);
+    }
   }
 
   logout(): void {
@@ -64,5 +109,10 @@ export class AuthService {
       console.error('Unable to read saved user session:', error);
       return null;
     }
+  }
+
+  private authHeaders(): HttpHeaders {
+    const token = this.realtime.getToken();
+    return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
   }
 }

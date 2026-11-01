@@ -1,6 +1,10 @@
 <div id="room-details-container">
   <div class="main-container">
-    <a id="back-to-rooms" routerLink="/hotelBooking">← Back to rooms</a>
+    <a
+      id="back-to-rooms"
+      [routerLink]="isHistoryView ? '/history' : '/hotelBooking'">
+      {{ isHistoryView ? '← Back to history' : '← Back to rooms' }}
+    </a>
     <p *ngIf="isLoading" role="status">Loading room details…</p>
     <p *ngIf="errorMessage" class="booking-error" role="alert">{{ errorMessage }}</p>
 
@@ -13,30 +17,38 @@
       <div class="room-details-form">
         <div id="room-details">
           <div id="room-image">
-            <img src="hotel-room-1.webp" alt="Hotel room">
+            <img [src]="roomImage" [alt]="selectedRoom.type + ' room'">
           </div>
 
           <div id="room-amenities-container">
-            <div class="room-amenities">
-              <img src="wifi-icon.png" alt="">
-              <p id="amenities-name">{{ selectedRoom.amenities }}</p>
-            </div>
+            <p id="amenities-name">{{ selectedRoom.amenities }}</p>
           </div>
           <div class="divider"></div>
           <small id="room-rules">Check-in from 3:00 pm · Check-out by 11:00 am · Non-smoking room</small>
         </div>
 
         <div id="room-form">
-          <h2>RM <span id="price-per-night">{{ selectedRoom.nightlyRate | number:'1.2-2' }}</span></h2>
+          <h2>RM <span id="price-per-night">{{ displayedNightlyRate | number:'1.2-2' }}</span></h2>
           <small id="price-rules">MYR per night · Fixed nightly rate · Up to {{ selectedRoom.capacity }} guests</small>
           <div class="divider" style="margin: 25px 0;"></div>
 
-          <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()">
+          <section *ngIf="isHistoryView" class="history-booking-summary" aria-label="Booking details">
+            <p *ngIf="bookingId"><strong>Booking:</strong> {{ bookingId }}</p>
+            <p *ngIf="bookingStatus"><strong>Status:</strong> {{ bookingStatus }}</p>
+            <p><strong>Check-in:</strong> {{ bookingForm.get('check-in-date')?.value | date:'mediumDate' }}</p>
+            <p><strong>Check-out:</strong> {{ bookingForm.get('check-out-date')?.value | date:'mediumDate' }}</p>
+            <p><strong>Guests:</strong> {{ occupancySummary }}</p>
+            <p><strong>Traveling with pets:</strong> {{ travelingWithPets ? 'Yes' : 'No' }}</p>
+            <p><strong>Total paid:</strong> RM {{ displayedTotal | number:'1.2-2' }}</p>
+            <button type="button" id="continue-booking-btn" (click)="backToHistory()">Back to history</button>
+          </section>
+
+          <form *ngIf="!isHistoryView" [formGroup]="bookingForm" (ngSubmit)="onSubmit()">
             <label for="check-in-date">Check-in</label>
-            <input type="date" id="check-in-date" formControlName="check-in-date" required>
+            <input type="date" id="check-in-date" formControlName="check-in-date" [min]="today" (change)="onCheckInChange()" required>
 
             <label for="check-out-date">Check-out</label>
-            <input type="date" id="check-out-date" formControlName="check-out-date" required>
+            <input type="date" id="check-out-date" formControlName="check-out-date" [min]="checkOutMin" required>
 
             <label for="num-guests">Guests</label>
             <div class="dropdown-container" (click)="$event.stopPropagation()">
@@ -89,9 +101,9 @@
 
             <div id="total-nights-price">
               <small id="night-price-calc">
-                RM {{ selectedRoom.nightlyRate | number:'1.2-2' }} × {{ getNights() }} night(s)
+                RM {{ displayedNightlyRate | number:'1.2-2' }} × {{ getNights() }} night(s)
               </small>
-              <small id="final-price">RM {{ selectedRoom.nightlyRate * getNights() | number:'1.2-2' }}</small>
+              <small id="final-price">RM {{ displayedTotal | number:'1.2-2' }}</small>
             </div>
 
             <button type="submit" id="continue-booking-btn">Continue to booking</button>

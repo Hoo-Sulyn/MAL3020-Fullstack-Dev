@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
+const profileRoutes = require('./routes/profile');
 const roomRoutes = require('./routes/rooms');
 const bookingRoutes = require('./routes/bookings');
 
@@ -12,6 +13,7 @@ app.use(express.json());
 
 app.get('/', (req, res) => res.send('API is running'));
 app.use('/api/auth', authRoutes);
+app.use('/api/profile', profileRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use((req, res) => res.status(404).json({ message: 'The requested API endpoint was not found.' }));

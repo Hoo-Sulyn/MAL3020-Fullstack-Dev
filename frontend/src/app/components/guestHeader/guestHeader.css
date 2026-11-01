@@ -47,6 +47,8 @@ header{
     display: flex;
     gap: 8px;
     cursor: pointer;
+    align-items: center;
+    text-decoration: none;
 }
 
 #user-profile img{
@@ -58,4 +60,29 @@ header{
 #user-name{
     font-size: 0.9rem;
     color: #252B25;
+}
+
+#user-sign-out{
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+#guest-name{
+    font-size: 0.8rem;
+    color: #74796F;
+    font-weight: bold;
+}
+
+#sign-out-btn{
+    border: 1px solid #E2E5DD;
+    border-radius: 8px;
+    background-color: white;
+    padding: 5px 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#sign-out-btn:hover{
+    background-color: #E2E5DD;
 }

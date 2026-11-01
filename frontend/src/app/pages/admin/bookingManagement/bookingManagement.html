@@ -112,13 +112,18 @@
                     <tbody>
                         <tr
                             *ngFor="let booking of visibleBookings"
-                            [class.is-active]="selectedBooking?.bookingId === booking.bookingId">
+                            [class.is-active]="selectedBooking?.bookingId === booking.bookingId"
+                            [attr.aria-label]="'Show details for booking ' + booking.bookingId"
+                            tabindex="0"
+                            (click)="selectBooking(booking)"
+                            (keydown.enter)="selectBookingFromRow($event, booking)"
+                            (keydown.space)="selectBookingFromRow($event, booking)">
                             <td class="guest-cell">
                                 <button
                                     type="button"
                                     class="guest-select"
                                     [attr.aria-pressed]="selectedBooking?.bookingId === booking.bookingId"
-                                    (click)="selectBooking(booking)">
+                                    (click)="selectBooking(booking); $event.stopPropagation()">
                                     {{ booking.guestName }}
                                 </button>
                                 <small>{{ booking.bookingId }}</small>
@@ -139,7 +144,7 @@
                                     type="button"
                                     class="row-action"
                                     [disabled]="isUpdating"
-                                    (click)="handleBookingAction(booking)">
+                                    (click)="handleBookingAction(booking); $event.stopPropagation()">
                                     {{ getActionLabel(booking) }}
                                 </button>
                             </td>

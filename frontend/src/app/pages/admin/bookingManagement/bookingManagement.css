@@ -256,6 +256,20 @@
     background: #edf1e9;
 }
 
+.booking-table tbody tr{
+    cursor: pointer;
+}
+
+.booking-table tbody tr:not(.is-active):hover td,
+.booking-table tbody tr:not(.is-active):focus td{
+    background: #f7f8f5;
+}
+
+.booking-table tbody tr:focus-visible{
+    outline: 2px solid #52634b;
+    outline-offset: -2px;
+}
+
 .guest-cell {
     min-width: 105px;
 }

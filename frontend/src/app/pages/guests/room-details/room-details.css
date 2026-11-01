@@ -59,11 +59,6 @@
 
 
 
-.room-amenities img{
-    width: 25px;
-    height: auto;
-}
-
 #amenities-name{
     font-size: 0.9rem;
     margin: 10px 0;
@@ -94,6 +89,21 @@
     margin: 14px 0 6px;
     color: #252B25;
     font-size: 0.9rem;
+}
+
+.history-booking-summary p{
+    margin: 14px 0;
+    color: #74796F;
+    font-size: 0.9rem;
+}
+
+.history-booking-summary strong{
+    color: #252B25;
+}
+
+.history-booking-summary #continue-booking-btn{
+    width: 100%;
+    margin-top: 16px;
 }
 
 #room-form input[type="date"]{
