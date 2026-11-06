@@ -93,7 +93,7 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem(this.sessionKey);
-    localStorage.removeItem('haven_token');
+    this.realtime.disconnect();
   }
 
   getCurrentUser(): AuthUser | null {

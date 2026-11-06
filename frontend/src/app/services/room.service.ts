@@ -114,6 +114,20 @@ export class RoomService {
     });
   }
 
+  updateGuestBooking(id: string, booking: {
+    checkIn: string;
+    checkOut: string;
+    adults: number;
+    children: number;
+    travelingWithPets: boolean;
+  }): Observable<Booking> {
+    return this.http.put<Booking>(
+      `${this.apiUrl}/bookings/${encodeURIComponent(id)}`,
+      booking,
+      { headers: this.authHeaders() }
+    );
+  }
+
   getMyBookings(): Observable<Booking[]> {
     return this.http.get<Booking[]>(`${this.apiUrl}/bookings/mine`, {
       headers: this.authHeaders(),

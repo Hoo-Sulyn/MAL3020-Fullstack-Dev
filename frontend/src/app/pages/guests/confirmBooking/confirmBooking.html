@@ -1,9 +1,11 @@
 <div id="confirm-booking-container">
   <div class="main-container">
-    <a id="back-to-room-details" routerLink="/hotelBooking">← Back to rooms</a>
+    <a id="back-to-room-details" [routerLink]="isEditing ? '/history' : '/hotelBooking'">
+      {{ isEditing ? '← Back to booking history' : '← Back to rooms' }}
+    </a>
 
     <div id="title">
-      <small>REVIEW & CONFIRM</small>
+      <small>{{ isEditing ? 'EDIT BOOKING' : 'REVIEW & CONFIRM' }}</small>
       <h1>A few details, then you're in!</h1>
       <p>Check your stay and guest details before confirming your booking.</p>
     </div>
@@ -119,7 +121,7 @@
           <p id="total-cost-calc">RM {{ selectedRoom.nightlyRate * getNights() | number:'1.2-2' }}</p>
         </div>
         <button type="submit" id="confirm-booking-btn" [disabled]="isSubmitting">
-          {{ isSubmitting ? 'Confirming…' : 'Confirm booking' }}
+          {{ isSubmitting ? (isEditing ? 'Saving…' : 'Confirming…') : (isEditing ? 'Save changes' : 'Confirm booking') }}
         </button>
       </div>
     </form>

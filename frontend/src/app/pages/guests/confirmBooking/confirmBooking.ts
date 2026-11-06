@@ -24,6 +24,8 @@ export class ConfirmBooking implements OnInit {
     room: Room | null = null;
     isLoading = true;
     isSubmitting = false;
+    isEditing = false;
+    editingBookingId = '';
     errorMessage = '';
 
     constructor(
@@ -62,7 +64,9 @@ export class ConfirmBooking implements OnInit {
 
     ngOnInit(): void {
         const params = this.route.snapshot.queryParamMap;
-        const roomId = params.get('roomId');
+        const bookingId = params.get('bookingId');
+        this.isEditing = Boolean(bookingId);
+        this.editingBookingId = bookingId || '';
         this.bookingForm.patchValue({
             'check-in-date': params.get('checkIn') || '',
             'check-out-date': params.get('checkOut') || '',
@@ -71,6 +75,43 @@ export class ConfirmBooking implements OnInit {
         this.children = Math.max(0, Number(params.get('children')) || 0);
         this.travelingWithPets = params.get('travelingWithPets') === 'true';
 
+        if (bookingId) {
+            this.loadBookingForEdit(bookingId);
+            return;
+        }
+
+        this.loadRoom(params.get('roomId') || '');
+    }
+
+    private loadBookingForEdit(bookingId: string): void {
+        this.roomService.getMyBookings().subscribe({
+            next: (bookings) => {
+                const booking = bookings.find((item) => item.id === bookingId);
+                if (!booking || booking.status !== 'Confirmed' || booking.checkIn <= getHotelDateValue()) {
+                    this.errorMessage = 'This booking can no longer be edited.';
+                    this.isLoading = false;
+                    this.changeDetector.markForCheck();
+                    return;
+                }
+
+                this.bookingForm.patchValue({
+                    'check-in-date': booking.checkIn,
+                    'check-out-date': booking.checkOut,
+                });
+                this.adults = booking.adults;
+                this.children = booking.children;
+                this.travelingWithPets = booking.travelingWithPets;
+                this.loadRoom(booking.roomId);
+            },
+            error: (error: unknown) => {
+                this.errorMessage = this.getRequestError(error, 'Unable to load this booking.');
+                this.isLoading = false;
+                this.changeDetector.markForCheck();
+            },
+        });
+    }
+
+    private loadRoom(roomId: string): void {
         if (!roomId) {
             this.errorMessage = 'Select a room before confirming your booking.';
             this.isLoading = false;
@@ -138,17 +179,22 @@ export class ConfirmBooking implements OnInit {
 
         this.isSubmitting = true;
         this.errorMessage = '';
-        this.roomService.createBooking({
-            roomId: this.room.id,
+        const bookingDetails = {
             checkIn,
             checkOut,
             adults: this.adults,
             children: this.children,
             travelingWithPets: this.travelingWithPets,
-        }).subscribe({
+        };
+        const saveBooking = this.isEditing
+            ? this.roomService.updateGuestBooking(this.editingBookingId, bookingDetails)
+            : this.roomService.createBooking({ roomId: this.room.id, ...bookingDetails });
+        saveBooking.subscribe({
             next: (booking) => {
-                this.router.navigate(['/history'], {
-                    queryParams: { confirmed: booking.bookingId },
+                void this.router.navigate(['/history'], {
+                    queryParams: this.isEditing
+                        ? { updated: booking.bookingId }
+                        : { confirmed: booking.bookingId },
                 });
             },
             error: (error: unknown) => {

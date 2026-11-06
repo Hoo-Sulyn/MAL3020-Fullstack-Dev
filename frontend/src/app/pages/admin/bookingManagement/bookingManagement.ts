@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, HostListener, OnInit } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Booking } from '../../../services/room.service';
 import { RoomService } from '../../../services/room.service';
+import { RealtimeService } from '../../../services/realtime.service';
 import { getHotelDateValue } from '../../../services/date.utils';
 
 type BookingStatus = Booking['status'];
@@ -21,6 +23,12 @@ export class BookingManagement implements OnInit {
     readonly today = getHotelDateValue();
     readonly bookingStatuses: Array<'All statuses' | BookingStatus> = [
         'All statuses',
+        'Confirmed',
+        'Checked in',
+        'Checked out',
+        'Cancelled'
+    ];
+    private readonly bookingStatusOrder: BookingStatus[] = [
         'Confirmed',
         'Checked in',
         'Checked out',
@@ -46,11 +54,16 @@ export class BookingManagement implements OnInit {
     constructor(
         private readonly roomService: RoomService,
         private readonly route: ActivatedRoute,
-        private readonly changeDetector: ChangeDetectorRef
+        private readonly changeDetector: ChangeDetectorRef,
+        private readonly realtime: RealtimeService,
+        private readonly destroyRef: DestroyRef
     ) {}
 
     ngOnInit(): void {
         this.loadBookings();
+        this.realtime.bookingChanges()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe(() => this.loadBookings(true));
     }
 
     get filteredBookings(): Booking[] {
@@ -75,7 +88,9 @@ export class BookingManagement implements OnInit {
                 || (this.selectedDate === 'Upcoming' && booking.checkIn > this.today)
                 || (this.selectedDate === 'Past' && booking.checkOut <= this.today);
             return matchesSearch && matchesStatus && matchesTab && matchesDate;
-        });
+        }).sort((a, b) =>
+            this.bookingStatusOrder.indexOf(a.status) - this.bookingStatusOrder.indexOf(b.status)
+        );
     }
 
     get selectedBooking(): Booking | null {
@@ -248,21 +263,31 @@ export class BookingManagement implements OnInit {
         this.dateFilterDropdownOpen = false;
     }
 
-    private loadBookings(): void {
+    private loadBookings(preserveSelection = false): void {
+        const previousSelectedBookingId = this.selectedBookingId;
         this.isLoading = true;
         this.pageError = '';
         this.roomService.getAdminBookings().subscribe({
             next: (bookings) => {
                 this.bookings = bookings;
+                const orderedBookings = this.filteredBookings;
                 const requestedBookingId = this.route.snapshot.queryParamMap.get('booking');
-                const requestedIndex = requestedBookingId
-                    ? bookings.findIndex((booking) => booking.bookingId === requestedBookingId)
-                    : -1;
-                if (requestedIndex >= 0) {
-                    this.selectedBookingId = bookings[requestedIndex].bookingId;
-                    this.currentPage = Math.floor(requestedIndex / this.pageSize) + 1;
+                const requestedBooking = requestedBookingId
+                    ? orderedBookings.find((booking) => booking.bookingId === requestedBookingId)
+                    : undefined;
+                const previouslySelectedBooking = preserveSelection
+                    ? orderedBookings.find((booking) => booking.bookingId === previousSelectedBookingId)
+                    : undefined;
+                this.selectedBookingId = (
+                    requestedBooking ?? previouslySelectedBooking ?? orderedBookings[0]
+                )?.bookingId || '';
+                const selectedIndex = orderedBookings.findIndex(
+                    (booking) => booking.bookingId === this.selectedBookingId
+                );
+                if (selectedIndex >= 0) {
+                    this.currentPage = Math.floor(selectedIndex / this.pageSize) + 1;
                 } else {
-                    this.selectedBookingId = bookings[0]?.bookingId || '';
+                    this.currentPage = Math.min(this.currentPage, this.pageCount);
                 }
                 this.isLoading = false;
                 this.changeDetector.markForCheck();
@@ -284,6 +309,12 @@ export class BookingManagement implements OnInit {
                     item.id === updatedBooking.id ? updatedBooking : item
                 );
                 this.selectedBookingId = updatedBooking.bookingId;
+                const updatedIndex = this.filteredBookings.findIndex(
+                    (item) => item.bookingId === updatedBooking.bookingId
+                );
+                if (updatedIndex >= 0) {
+                    this.currentPage = Math.floor(updatedIndex / this.pageSize) + 1;
+                }
                 this.isUpdating = false;
                 this.changeDetector.markForCheck();
             },

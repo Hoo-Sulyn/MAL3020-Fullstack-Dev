@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../services/auth.service';
 import { Booking, RoomService } from '../../../services/room.service';
+import { RealtimeService } from '../../../services/realtime.service';
 import { getHotelDateValue } from '../../../services/date.utils';
 import { getRoomImage } from '../../../services/room-image.utils';
 
@@ -32,7 +34,9 @@ export class History implements OnInit {
         private readonly auth: AuthService,
         private readonly route: ActivatedRoute,
         private readonly router: Router,
-        private readonly changeDetector: ChangeDetectorRef
+        private readonly changeDetector: ChangeDetectorRef,
+        private readonly realtime: RealtimeService,
+        private readonly destroyRef: DestroyRef
     ) {}
 
     get currentAndUpcomingBookings(): Booking[] {
@@ -63,12 +67,32 @@ export class History implements OnInit {
 
     ngOnInit(): void {
         const confirmedBooking = this.route.snapshot.queryParamMap.get('confirmed');
+        const updatedBooking = this.route.snapshot.queryParamMap.get('updated');
         if (confirmedBooking) {
             this.successMessage = `Booking ${confirmedBooking} is confirmed.`;
+        } else if (updatedBooking) {
+            this.successMessage = `Booking ${updatedBooking} has been updated.`;
         }
+        this.loadBookings();
+        this.realtime.bookingChanges()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((event) => {
+                if (this.bookings.some((booking) => booking.id === event.id)) {
+                    this.loadBookings(true);
+                }
+            });
+    }
+
+    private loadBookings(preserveSelection = false): void {
+        const selectedBookingId = preserveSelection ? this.selectedBooking?.id : null;
+        this.isLoading = true;
+        this.errorMessage = '';
         this.roomService.getMyBookings().subscribe({
             next: (bookings) => {
                 this.bookings = bookings;
+                this.selectedBooking = selectedBookingId
+                    ? bookings.find((booking) => booking.id === selectedBookingId) ?? null
+                    : null;
                 this.isLoading = false;
                 this.changeDetector.markForCheck();
             },
@@ -85,6 +109,10 @@ export class History implements OnInit {
     }
 
     canCancel(booking: Booking): boolean {
+        return booking.status === 'Confirmed' && booking.checkIn > getHotelDateValue();
+    }
+
+    canEdit(booking: Booking): boolean {
         return booking.status === 'Confirmed' && booking.checkIn > getHotelDateValue();
     }
 
@@ -113,6 +141,12 @@ export class History implements OnInit {
                 bookingTotal: booking.total,
                 nightlyRate: booking.nightlyRate,
             },
+        });
+    }
+
+    editBooking(booking: Booking): void {
+        void this.router.navigate(['/confirmBooking'], {
+            queryParams: { bookingId: booking.id },
         });
     }
 

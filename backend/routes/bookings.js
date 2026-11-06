@@ -61,6 +61,16 @@ function bookingData(booking) {
   };
 }
 
+function notifyBookingChange(req, action, booking) {
+  const event = {
+    action,
+    id: booking._id.toString(),
+  };
+  const io = req.app.get('io');
+  io.to('admins').emit('booking:changed', event);
+  io.to(`guest:${booking.guestId.toString()}`).emit('booking:changed', event);
+}
+
 router.get('/mine', requireAuth('guest'), async (req, res, next) => {
   try {
     const bookings = await Booking.find({ guestId: req.auth.userId }).sort({ checkIn: -1 }).lean();
@@ -148,7 +158,97 @@ router.post('/', requireAuth('guest'), async (req, res, next) => {
     if (!booking) {
       return res.status(409).json({ message: 'This room is no longer available for those dates.' });
     }
+    notifyBookingChange(req, 'created', booking);
     return res.status(201).json(bookingData(booking));
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.put('/:id', requireAuth('guest'), async (req, res, next) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid booking identifier.' });
+    }
+    if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) {
+      return res.status(400).json({ message: 'Please provide booking details.' });
+    }
+
+    const { checkIn, checkOut, adults, children, travelingWithPets } = req.body;
+    const today = getHotelDateValue();
+    if (!validDate(checkIn) || !validDate(checkOut) || checkIn < today || checkIn >= checkOut) {
+      return res.status(400).json({ message: 'Choose a valid stay with check-out after check-in.' });
+    }
+    if (!Number.isInteger(adults) || adults < 1 || !Number.isInteger(children) || children < 0) {
+      return res.status(400).json({ message: 'Enter a valid guest count.' });
+    }
+    if (typeof travelingWithPets !== 'boolean') {
+      return res.status(400).json({ message: 'Select a valid pet preference.' });
+    }
+
+    const editableBooking = await Booking.findOne({
+      _id: req.params.id,
+      guestId: req.auth.userId,
+      status: 'Confirmed',
+      checkIn: { $gt: today },
+    }).select('roomId').lean();
+    if (!editableBooking) {
+      return res.status(404).json({ message: 'This booking can no longer be edited.' });
+    }
+
+    const result = await withRoomBookingLock(editableBooking.roomId.toString(), async () => {
+      const booking = await Booking.findOne({
+        _id: req.params.id,
+        guestId: req.auth.userId,
+        status: 'Confirmed',
+        checkIn: { $gt: today },
+      });
+      if (!booking) {
+        return { status: 404, message: 'This booking can no longer be edited.' };
+      }
+
+      const room = await Room.findById(booking.roomId);
+      if (!room) {
+        return { status: 404, message: 'The booked room no longer exists.' };
+      }
+      if (room.statusOverride === 'Maintenance') {
+        return { status: 409, message: 'This room is under maintenance and cannot be booked.' };
+      }
+      if (adults + children > room.capacity) {
+        return { status: 400, message: `This room accommodates up to ${room.capacity} guest(s).` };
+      }
+
+      const conflictingBooking = await Booking.findOne({
+        _id: { $ne: booking._id },
+        roomId: booking.roomId,
+        status: { $in: activeStatuses },
+        checkIn: { $lt: checkOut },
+        checkOut: { $gt: checkIn },
+      }).select('_id').lean();
+      if (conflictingBooking) {
+        return { status: 409, message: 'This room is no longer available for those dates.' };
+      }
+
+      const nights = (
+        Date.parse(`${checkOut}T00:00:00.000Z`)
+        - Date.parse(`${checkIn}T00:00:00.000Z`)
+      ) / 86_400_000;
+      booking.checkIn = checkIn;
+      booking.checkOut = checkOut;
+      booking.adults = adults;
+      booking.children = children;
+      booking.travelingWithPets = travelingWithPets;
+      booking.nightlyRate = room.nightlyRate;
+      booking.total = room.nightlyRate * nights;
+      await booking.save();
+      return { booking };
+    });
+
+    if (!result.booking) {
+      return res.status(result.status).json({ message: result.message });
+    }
+    notifyBookingChange(req, 'updated', result.booking);
+    return res.json(bookingData(result.booking));
   } catch (error) {
     return next(error);
   }
@@ -171,6 +271,7 @@ router.patch('/:id/cancel', requireAuth('guest'), async (req, res, next) => {
     }
     booking.status = 'Cancelled';
     await booking.save();
+    notifyBookingChange(req, 'updated', booking);
     return res.json(bookingData(booking));
   } catch (error) {
     return next(error);
@@ -204,6 +305,7 @@ router.patch('/:id/status', requireAuth('admin'), async (req, res, next) => {
     }
     booking.status = status;
     await booking.save();
+    notifyBookingChange(req, 'updated', booking);
     return res.json(bookingData(booking));
   } catch (error) {
     return next(error);

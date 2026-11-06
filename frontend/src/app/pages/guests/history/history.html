@@ -29,7 +29,12 @@
                         <button *ngIf="canCancel(booking)" type="button" class="history-cancel-button" (click)="openCancellation(booking)">
                             Cancel booking
                         </button>
-                        <button type="button" class="history-details-button" (click)="showBookingDetails(booking)">Show details</button>
+                        <button
+                            type="button"
+                            class="history-details-button"
+                            (click)="canEdit(booking) ? editBooking(booking) : showBookingDetails(booking)">
+                            {{ canEdit(booking) ? 'Edit details' : 'Show details' }}
+                        </button>
                     </div>
                 </article>
                 <p *ngIf="!isLoading && !errorMessage && currentAndUpcomingBookings.length === 0" class="history-empty">No current or upcoming bookings.</p>

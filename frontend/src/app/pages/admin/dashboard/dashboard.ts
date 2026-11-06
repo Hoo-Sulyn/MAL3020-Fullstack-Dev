@@ -1,9 +1,11 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { forkJoin } from 'rxjs';
 import { Booking, Room, RoomService } from '../../../services/room.service';
+import { RealtimeService } from '../../../services/realtime.service';
 import { getHotelDateValue } from '../../../services/date.utils';
 
 type DashboardBookingStatus = 'All statuses' | Booking['status'];
@@ -11,7 +13,7 @@ type DashboardBookingStatus = 'All statuses' | Booking['status'];
 @Component({
     selector: 'app-dashboard',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, RouterLink],
     templateUrl: './dashboard.html',
     styleUrl: './dashboard.css'
 })
@@ -40,10 +42,21 @@ export class Dashboard implements OnInit {
     constructor(
         private readonly roomService: RoomService,
         private readonly router: Router,
-        private readonly changeDetector: ChangeDetectorRef
+        private readonly changeDetector: ChangeDetectorRef,
+        private readonly realtime: RealtimeService,
+        private readonly destroyRef: DestroyRef
     ) {}
 
     ngOnInit(): void {
+        this.loadDashboardData();
+        this.realtime.bookingChanges()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe(() => this.loadDashboardData());
+    }
+
+    private loadDashboardData(): void {
+        this.isLoading = true;
+        this.pageError = '';
         forkJoin({
             rooms: this.roomService.getAdminRooms(),
             bookings: this.roomService.getAdminBookings()

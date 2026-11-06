@@ -1,4 +1,5 @@
 require('dotenv').config();
+const http = require('node:http');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -6,8 +7,12 @@ const authRoutes = require('./routes/auth');
 const profileRoutes = require('./routes/profile');
 const roomRoutes = require('./routes/rooms');
 const bookingRoutes = require('./routes/bookings');
+const createRealtimeServer = require('./services/realtime-server');
 
 const app = express();
+const server = http.createServer(app);
+const io = createRealtimeServer(server);
+app.set('io', io);
 app.use(cors({ origin: 'http://localhost:4200' }));
 app.use(express.json());
 
@@ -39,7 +44,7 @@ async function startServer() {
   console.log('MongoDB connected');
 
   const port = process.env.PORT || 3000;
-  app.listen(port, () => console.log(`Server on port ${port}`));
+  server.listen(port, () => console.log(`Server on port ${port}`));
 }
 
 startServer().catch((error) => {
