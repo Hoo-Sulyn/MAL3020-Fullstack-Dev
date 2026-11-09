@@ -5,6 +5,7 @@ const Room = require('../models/room');
 const User = require('../models/user');
 const requireAuth = require('../middleware/require-auth');
 const { getHotelDateValue } = require('../utils/date');
+const { isValidBookingDate, toBookingResponse } = require('../utils/booking');
 
 const router = express.Router();
 const activeStatuses = ['Confirmed', 'Checked in'];
@@ -28,39 +29,6 @@ async function withRoomBookingLock(roomId, operation) {
   }
 }
 
-function validDate(value) {
-  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    return false;
-  }
-  const date = new Date(`${value}T00:00:00.000Z`);
-  return !Number.isNaN(date.valueOf()) && date.toISOString().slice(0, 10) === value;
-}
-
-function bookingData(booking) {
-  const value = typeof booking.toObject === 'function' ? booking.toObject() : booking;
-  return {
-    id: value._id.toString(),
-    bookingId: `HV-${value._id.toString().slice(-6).toUpperCase()}`,
-    guestId: value.guestId.toString(),
-    guestName: value.guestName,
-    email: value.guestEmail,
-    phone: value.guestPhone,
-    roomId: value.roomId.toString(),
-    room: `${value.roomNumber} · ${value.roomType}`,
-    roomNumber: value.roomNumber,
-    roomType: value.roomType,
-    checkIn: value.checkIn,
-    checkOut: value.checkOut,
-    status: value.status,
-    total: value.total,
-    nightlyRate: value.nightlyRate,
-    adults: value.adults,
-    children: value.children,
-    travelingWithPets: value.travelingWithPets,
-    createdAt: value.createdAt,
-  };
-}
-
 function notifyBookingChange(req, action, booking) {
   const event = {
     action,
@@ -74,7 +42,7 @@ function notifyBookingChange(req, action, booking) {
 router.get('/mine', requireAuth('guest'), async (req, res, next) => {
   try {
     const bookings = await Booking.find({ guestId: req.auth.userId }).sort({ checkIn: -1 }).lean();
-    return res.json(bookings.map(bookingData));
+    return res.json(bookings.map(toBookingResponse));
   } catch (error) {
     return next(error);
   }
@@ -83,7 +51,7 @@ router.get('/mine', requireAuth('guest'), async (req, res, next) => {
 router.get('/admin', requireAuth('admin'), async (req, res, next) => {
   try {
     const bookings = await Booking.find().sort({ checkIn: -1, createdAt: -1 }).lean();
-    return res.json(bookings.map(bookingData));
+    return res.json(bookings.map(toBookingResponse));
   } catch (error) {
     return next(error);
   }
@@ -98,7 +66,7 @@ router.post('/', requireAuth('guest'), async (req, res, next) => {
     if (!mongoose.isValidObjectId(roomId)) {
       return res.status(400).json({ message: 'Select a valid room.' });
     }
-    if (!validDate(checkIn) || !validDate(checkOut) || checkIn < getHotelDateValue() || checkIn >= checkOut) {
+    if (!isValidBookingDate(checkIn) || !isValidBookingDate(checkOut) || checkIn < getHotelDateValue() || checkIn >= checkOut) {
       return res.status(400).json({ message: 'Choose a valid stay with check-out after check-in.' });
     }
     if (!Number.isInteger(adults) || adults < 1 || !Number.isInteger(children) || children < 0) {
@@ -159,7 +127,7 @@ router.post('/', requireAuth('guest'), async (req, res, next) => {
       return res.status(409).json({ message: 'This room is no longer available for those dates.' });
     }
     notifyBookingChange(req, 'created', booking);
-    return res.status(201).json(bookingData(booking));
+    return res.status(201).json(toBookingResponse(booking));
   } catch (error) {
     return next(error);
   }
@@ -176,7 +144,7 @@ router.put('/:id', requireAuth('guest'), async (req, res, next) => {
 
     const { checkIn, checkOut, adults, children, travelingWithPets } = req.body;
     const today = getHotelDateValue();
-    if (!validDate(checkIn) || !validDate(checkOut) || checkIn < today || checkIn >= checkOut) {
+    if (!isValidBookingDate(checkIn) || !isValidBookingDate(checkOut) || checkIn < today || checkIn >= checkOut) {
       return res.status(400).json({ message: 'Choose a valid stay with check-out after check-in.' });
     }
     if (!Number.isInteger(adults) || adults < 1 || !Number.isInteger(children) || children < 0) {
@@ -248,7 +216,7 @@ router.put('/:id', requireAuth('guest'), async (req, res, next) => {
       return res.status(result.status).json({ message: result.message });
     }
     notifyBookingChange(req, 'updated', result.booking);
-    return res.json(bookingData(result.booking));
+    return res.json(toBookingResponse(result.booking));
   } catch (error) {
     return next(error);
   }
@@ -272,7 +240,7 @@ router.patch('/:id/cancel', requireAuth('guest'), async (req, res, next) => {
     booking.status = 'Cancelled';
     await booking.save();
     notifyBookingChange(req, 'updated', booking);
-    return res.json(bookingData(booking));
+    return res.json(toBookingResponse(booking));
   } catch (error) {
     return next(error);
   }
@@ -306,7 +274,7 @@ router.patch('/:id/status', requireAuth('admin'), async (req, res, next) => {
     booking.status = status;
     await booking.save();
     notifyBookingChange(req, 'updated', booking);
-    return res.json(bookingData(booking));
+    return res.json(toBookingResponse(booking));
   } catch (error) {
     return next(error);
   }
