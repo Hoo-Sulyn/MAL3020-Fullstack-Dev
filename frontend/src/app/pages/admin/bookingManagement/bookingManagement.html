@@ -140,6 +140,7 @@
                             </td>
                             <td class="booking-total">{{ formatCurrency(booking.total) }}</td>
                             <td>
+                                <div class="row-actions">
                                 <button
                                     type="button"
                                     class="row-action"
@@ -147,6 +148,15 @@
                                     (click)="handleBookingAction(booking); $event.stopPropagation()">
                                     {{ getActionLabel(booking) }}
                                 </button>
+                                <button
+                                    *ngIf="canCancel(booking)"
+                                    type="button"
+                                    class="row-action row-cancel-action"
+                                    [disabled]="isUpdating"
+                                    (click)="requestCancellation(booking); $event.stopPropagation()">
+                                    Cancel
+                                </button>
+                                </div>
                             </td>
                         </tr>
                         <tr *ngIf="isLoading">

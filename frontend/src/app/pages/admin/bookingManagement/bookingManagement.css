@@ -333,6 +333,17 @@
     cursor: pointer;
 }
 
+.row-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.row-cancel-action {
+    color: #a6534b;
+}
+
 .row-action:hover,
 .guest-select:hover {
     text-decoration: underline;

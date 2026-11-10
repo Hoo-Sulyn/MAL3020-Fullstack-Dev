@@ -419,6 +419,45 @@ test('enforces valid booking status transitions', async (context) => {
   })).status, 409);
 });
 
+test('does not automatically check out a confirmed booking after its checkout date', async (context) => {
+  if (!testMongoUri) {
+    context.skip('A local test MongoDB is required.');
+    return;
+  }
+
+  const room = await createRoom();
+  const booking = await Booking.create({
+    guestId: firstGuest._id,
+    guestName: `${firstGuest.firstName} ${firstGuest.lastName}`,
+    guestEmail: firstGuest.email,
+    guestPhone: firstGuest.phone,
+    roomId: room._id,
+    roomNumber: room.number,
+    roomType: room.type,
+    checkIn: '2020-01-01',
+    checkOut: '2020-01-03',
+    adults: 1,
+    children: 0,
+    travelingWithPets: false,
+    nightlyRate: room.nightlyRate,
+    total: room.nightlyRate * 2,
+    status: 'Confirmed',
+  });
+
+  const bookingsResponse = await request('/api/bookings/admin', { token: tokenFor(admin) });
+  assert.equal(bookingsResponse.status, 200);
+  const listedBookings = await bookingsResponse.json();
+  const listedBooking = listedBookings.find((item) => item.id === booking.id);
+  assert.equal(listedBooking.status, 'Confirmed');
+
+  const checkoutResponse = await request(`/api/bookings/${booking.id}/status`, {
+    method: 'PATCH',
+    token: tokenFor(admin),
+    body: { status: 'Checked out' },
+  });
+  assert.equal(checkoutResponse.status, 409);
+});
+
 test('supports admin room create, read, update, status change, and delete', async (context) => {
   if (!testMongoUri) {
     context.skip('A local test MongoDB is required.');

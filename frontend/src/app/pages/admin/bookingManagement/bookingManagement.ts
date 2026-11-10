@@ -213,7 +213,12 @@ export class BookingManagement implements OnInit {
     }
 
     canCancel(booking: Booking): boolean {
-        return booking.status === 'Confirmed' && booking.checkIn > this.today;
+        return booking.status === 'Confirmed';
+    }
+
+    requestCancellation(booking: Booking): void {
+        this.selectBooking(booking);
+        this.openCancelConfirmation();
     }
 
     getActionLabel(booking: Booking): string {

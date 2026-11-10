@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ChangeDetectorRef } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   ReactiveFormsModule,
   FormBuilder,
@@ -36,7 +38,8 @@ export class GuestRegister {
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,
-    private router: Router
+    private router: Router,
+    private readonly changeDetector: ChangeDetectorRef
   ) {
     this.registerForm = this.fb.group(
       {
@@ -73,11 +76,17 @@ export class GuestRegister {
     }).subscribe({
       next: () => {
         this.successMessage = 'Account created successfully. Redirecting to sign in...';
+        this.changeDetector.markForCheck();
         setTimeout(() => this.router.navigateByUrl('/'), 800);
       },
-      error: (error: { error?: { message?: string } }) => {
-        this.errorMessage = error.error?.message || 'Unable to create your account right now.';
+      error: (error: unknown) => {
+        this.errorMessage = error instanceof HttpErrorResponse && error.status === 409
+          ? 'An account with this email already exists. Please sign in or use a different email.'
+          : error instanceof HttpErrorResponse && typeof error.error?.message === 'string'
+            ? error.error.message
+            : 'Unable to create your account right now.';
         this.isSubmitting = false;
+        this.changeDetector.markForCheck();
       },
     });
   }
