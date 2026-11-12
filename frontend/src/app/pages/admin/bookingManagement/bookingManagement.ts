@@ -34,7 +34,7 @@ export class BookingManagement implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly today = getHotelDateValue();
-  readonly bookingStatuses: Array<'All statuses' | BookingStatus> = [
+  readonly bookingStatuses: ('All statuses' | BookingStatus)[] = [
     'All statuses',
     'Confirmed',
     'Checked in',
