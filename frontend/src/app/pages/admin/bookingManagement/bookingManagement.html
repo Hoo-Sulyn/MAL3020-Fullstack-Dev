@@ -1,251 +1,336 @@
 <div class="booking-management-container">
-    <header class="page-header">
-        <h1>Bookings management</h1>
-        <p>View guest bookings and manage arrivals, departures and cancellations.</p>
-        <small>{{ bookings.length }} total bookings · {{ formatDate(today) }} · All dates in hotel local time</small>
-    </header>
+  <header class="page-header">
+    <h1>Bookings management</h1>
+    <p>View guest bookings and manage arrivals, departures and cancellations.</p>
+    <small
+      >{{ bookings.length }} total bookings · {{ formatDate(today) }} · All dates in hotel local
+      time</small
+    >
+  </header>
 
-    <p *ngIf="pageError" class="booking-page-error" role="alert">{{ pageError }}</p>
+  @if (pageError) {
+    <p class="booking-page-error" role="alert">{{ pageError }}</p>
+  }
 
-    <div class="booking-management-layout">
-        <section class="booking-list" aria-label="Bookings">
-            <div class="booking-list-toolbar">
-                <form class="search-bar" (submit)="$event.preventDefault()">
-                    <img src="black-search-icon.png" alt="">
-                    <input
-                        type="search"
-                        placeholder="Search guest or booking ID"
-                        aria-label="Search by guest name or booking ID"
-                        [value]="searchQuery"
-                        (input)="updateSearchQuery($event)">
-                </form>
+  <div class="booking-management-layout">
+    <section class="booking-list" aria-label="Bookings">
+      <div class="booking-list-toolbar">
+        <form class="search-bar" (submit)="$event.preventDefault()">
+          <img src="black-search-icon.png" alt="" />
+          <input
+            type="search"
+            placeholder="Search guest or booking ID"
+            aria-label="Search by guest name or booking ID"
+            [value]="searchQuery"
+            (input)="updateSearchQuery($event)"
+          />
+        </form>
 
-                <div class="filter-container" (click)="$event.stopPropagation()">
-                    <button
-                        type="button"
-                        class="filter-button"
-                        [attr.aria-expanded]="statusFilterDropdownOpen"
-                        aria-haspopup="listbox"
-                        (click)="toggleStatusFilterDropdown()">
-                        {{ selectedStatus }} <span class="filter-chevron" aria-hidden="true"></span>
-                    </button>
-                    <div
-                        *ngIf="statusFilterDropdownOpen"
-                        class="filter-options"
-                        role="listbox"
-                        aria-label="Booking status">
-                        <button
-                            *ngFor="let status of bookingStatuses"
-                            type="button"
-                            role="option"
-                            [attr.aria-selected]="selectedStatus === status"
-                            [class.is-selected]="selectedStatus === status"
-                            (click)="selectBookingStatus(status)">
-                            {{ status }}
-                        </button>
-                    </div>
-                </div>
-
-                <div class="filter-container" (click)="$event.stopPropagation()">
-                    <button
-                        type="button"
-                        class="filter-button"
-                        [attr.aria-expanded]="dateFilterDropdownOpen"
-                        aria-haspopup="listbox"
-                        (click)="toggleDateFilterDropdown()">
-                        {{ selectedDate }} <span class="filter-chevron" aria-hidden="true"></span>
-                    </button>
-                    <div
-                        *ngIf="dateFilterDropdownOpen"
-                        class="filter-options"
-                        role="listbox"
-                        aria-label="Booking date">
-                        <button
-                            *ngFor="let date of dateFilters"
-                            type="button"
-                            role="option"
-                            [attr.aria-selected]="selectedDate === date"
-                            [class.is-selected]="selectedDate === date"
-                            (click)="selectDateFilter(date)">
-                            {{ date }}
-                        </button>
-                    </div>
-                </div>
+        <div class="filter-container" (click)="$event.stopPropagation()">
+          <button
+            type="button"
+            class="filter-button"
+            [attr.aria-expanded]="statusFilterDropdownOpen"
+            aria-haspopup="listbox"
+            (click)="toggleStatusFilterDropdown()"
+          >
+            {{ selectedStatus }} <span class="filter-chevron" aria-hidden="true"></span>
+          </button>
+          @if (statusFilterDropdownOpen) {
+            <div class="filter-options" role="listbox" aria-label="Booking status">
+              @for (status of bookingStatuses; track status) {
+                <button
+                  type="button"
+                  role="option"
+                  [attr.aria-selected]="selectedStatus === status"
+                  [class.is-selected]="selectedStatus === status"
+                  (click)="selectBookingStatus(status)"
+                >
+                  {{ status }}
+                </button>
+              }
             </div>
+          }
+        </div>
 
-            <nav class="booking-tabs" aria-label="Booking date views">
+        <div class="filter-container" (click)="$event.stopPropagation()">
+          <button
+            type="button"
+            class="filter-button"
+            [attr.aria-expanded]="dateFilterDropdownOpen"
+            aria-haspopup="listbox"
+            (click)="toggleDateFilterDropdown()"
+          >
+            {{ selectedDate }} <span class="filter-chevron" aria-hidden="true"></span>
+          </button>
+          @if (dateFilterDropdownOpen) {
+            <div class="filter-options" role="listbox" aria-label="Booking date">
+              @for (date of dateFilters; track date) {
                 <button
-                    type="button"
-                    [class.is-selected]="selectedTab === 'all'"
-                    [attr.aria-pressed]="selectedTab === 'all'"
-                    (click)="selectTab('all')">
-                    All bookings
+                  type="button"
+                  role="option"
+                  [attr.aria-selected]="selectedDate === date"
+                  [class.is-selected]="selectedDate === date"
+                  (click)="selectDateFilter(date)"
+                >
+                  {{ date }}
                 </button>
-                <button
-                    type="button"
-                    [class.is-selected]="selectedTab === 'arrivals'"
-                    [attr.aria-pressed]="selectedTab === 'arrivals'"
-                    (click)="selectTab('arrivals')">
-                    Arrivals today · {{ arrivalsToday }}
-                </button>
-                <button
-                    type="button"
-                    [class.is-selected]="selectedTab === 'departures'"
-                    [attr.aria-pressed]="selectedTab === 'departures'"
-                    (click)="selectTab('departures')">
-                    Departures today · {{ departuresToday }}
-                </button>
-            </nav>
-
-            <div class="booking-table-scroll">
-                <table class="booking-table">
-                    <thead>
-                        <tr>
-                            <th scope="col">Guest / Booking ID</th>
-                            <th scope="col">Room</th>
-                            <th scope="col">Check-in / Check-out</th>
-                            <th scope="col">Status</th>
-                            <th scope="col">MYR</th>
-                            <th scope="col">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr
-                            *ngFor="let booking of visibleBookings"
-                            [class.is-active]="selectedBooking?.bookingId === booking.bookingId"
-                            [attr.aria-label]="'Show details for booking ' + booking.bookingId"
-                            tabindex="0"
-                            (click)="selectBooking(booking)"
-                            (keydown.enter)="selectBookingFromRow($event, booking)"
-                            (keydown.space)="selectBookingFromRow($event, booking)">
-                            <td class="guest-cell">
-                                <button
-                                    type="button"
-                                    class="guest-select"
-                                    [attr.aria-pressed]="selectedBooking?.bookingId === booking.bookingId"
-                                    (click)="selectBooking(booking); $event.stopPropagation()">
-                                    {{ booking.guestName }}
-                                </button>
-                                <small>{{ booking.bookingId }}</small>
-                            </td>
-                            <td>{{ booking.room }}</td>
-                            <td>
-                                <span class="booking-dates">{{ formatShortDate(booking.checkIn) }} → {{ formatShortDate(booking.checkOut) }}</span>
-                                <small>{{ getNights(booking) }} nights · 2026</small>
-                            </td>
-                            <td>
-                                <span class="status-badge" [ngClass]="'status-' + booking.status.toLowerCase().replace(' ', '-')">
-                                    {{ booking.status }}
-                                </span>
-                            </td>
-                            <td class="booking-total">{{ formatCurrency(booking.total) }}</td>
-                            <td>
-                                <div class="row-actions">
-                                <button
-                                    type="button"
-                                    class="row-action"
-                                    [disabled]="isUpdating"
-                                    (click)="handleBookingAction(booking); $event.stopPropagation()">
-                                    {{ getActionLabel(booking) }}
-                                </button>
-                                <button
-                                    *ngIf="canCancel(booking)"
-                                    type="button"
-                                    class="row-action row-cancel-action"
-                                    [disabled]="isUpdating"
-                                    (click)="requestCancellation(booking); $event.stopPropagation()">
-                                    Cancel
-                                </button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr *ngIf="isLoading">
-                            <td class="empty-state" colspan="6">Loading bookings…</td>
-                        </tr>
-                        <tr *ngIf="!isLoading && !pageError && bookings.length === 0">
-                            <td class="empty-state" colspan="6">No bookings yet.</td>
-                        </tr>
-                        <tr *ngIf="!isLoading && !pageError && bookings.length > 0 && filteredBookings.length === 0">
-                            <td class="empty-state" colspan="6">No bookings match the selected filters.</td>
-                        </tr>
-                    </tbody>
-                </table>
+              }
             </div>
+          }
+        </div>
+      </div>
 
-            <footer class="booking-list-footer">
-                <small>Showing {{ firstVisibleBooking }}–{{ lastVisibleBooking }} of {{ filteredBookings.length }} bookings</small>
-                <div class="pagination-controls" aria-label="Booking pages">
-                    <button type="button" [disabled]="currentPage === 1" (click)="previousPage()">Previous</button>
-                    <small>Page {{ currentPage }} of {{ pageCount }}</small>
-                    <button type="button" [disabled]="currentPage === pageCount" (click)="nextPage()">Next <span aria-hidden="true">→</span></button>
-                </div>
-            </footer>
+      <nav class="booking-tabs" aria-label="Booking date views">
+        <button
+          type="button"
+          [class.is-selected]="selectedTab === 'all'"
+          [attr.aria-pressed]="selectedTab === 'all'"
+          (click)="selectTab('all')"
+        >
+          All bookings
+        </button>
+        <button
+          type="button"
+          [class.is-selected]="selectedTab === 'arrivals'"
+          [attr.aria-pressed]="selectedTab === 'arrivals'"
+          (click)="selectTab('arrivals')"
+        >
+          Arrivals today · {{ arrivalsToday }}
+        </button>
+        <button
+          type="button"
+          [class.is-selected]="selectedTab === 'departures'"
+          [attr.aria-pressed]="selectedTab === 'departures'"
+          (click)="selectTab('departures')"
+        >
+          Departures today · {{ departuresToday }}
+        </button>
+      </nav>
+
+      <div class="booking-table-scroll">
+        <table class="booking-table">
+          <thead>
+            <tr>
+              <th scope="col">Guest / Booking ID</th>
+              <th scope="col">Room</th>
+              <th scope="col">Check-in / Check-out</th>
+              <th scope="col">Status</th>
+              <th scope="col">MYR</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (booking of visibleBookings; track booking) {
+              <tr
+                [class.is-active]="selectedBooking?.bookingId === booking.bookingId"
+                [attr.aria-label]="'Show details for booking ' + booking.bookingId"
+                tabindex="0"
+                (click)="selectBooking(booking)"
+                (keydown.enter)="selectBookingFromRow($event, booking)"
+                (keydown.space)="selectBookingFromRow($event, booking)"
+              >
+                <td class="guest-cell">
+                  <button
+                    type="button"
+                    class="guest-select"
+                    [attr.aria-pressed]="selectedBooking?.bookingId === booking.bookingId"
+                    (click)="selectBooking(booking); $event.stopPropagation()"
+                  >
+                    {{ booking.guestName }}
+                  </button>
+                  <small>{{ booking.bookingId }}</small>
+                </td>
+                <td>{{ booking.room }}</td>
+                <td>
+                  <span class="booking-dates"
+                    >{{ formatShortDate(booking.checkIn) }} →
+                    {{ formatShortDate(booking.checkOut) }}</span
+                  >
+                  <small>{{ getNights(booking) }} nights · 2026</small>
+                </td>
+                <td>
+                  <span
+                    class="status-badge"
+                    [ngClass]="'status-' + booking.status.toLowerCase().replace(' ', '-')"
+                  >
+                    {{ booking.status }}
+                  </span>
+                </td>
+                <td class="booking-total">{{ formatCurrency(booking.total) }}</td>
+                <td>
+                  <div class="row-actions">
+                    <button
+                      type="button"
+                      class="row-action"
+                      [disabled]="isUpdating"
+                      (click)="handleBookingAction(booking); $event.stopPropagation()"
+                    >
+                      {{ getActionLabel(booking) }}
+                    </button>
+                    @if (canCancel(booking)) {
+                      <button
+                        type="button"
+                        class="row-action row-cancel-action"
+                        [disabled]="isUpdating"
+                        (click)="requestCancellation(booking); $event.stopPropagation()"
+                      >
+                        Cancel
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+            @if (isLoading) {
+              <tr>
+                <td class="empty-state" colspan="6">Loading bookings…</td>
+              </tr>
+            }
+            @if (!isLoading && !pageError && bookings.length === 0) {
+              <tr>
+                <td class="empty-state" colspan="6">No bookings yet.</td>
+              </tr>
+            }
+            @if (!isLoading && !pageError && bookings.length > 0 && filteredBookings.length === 0) {
+              <tr>
+                <td class="empty-state" colspan="6">No bookings match the selected filters.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <footer class="booking-list-footer">
+        <small
+          >Showing {{ firstVisibleBooking }}–{{ lastVisibleBooking }} of
+          {{ filteredBookings.length }} bookings</small
+        >
+        <div class="pagination-controls" aria-label="Booking pages">
+          <button type="button" [disabled]="currentPage === 1" (click)="previousPage()">
+            Previous
+          </button>
+          <small>Page {{ currentPage }} of {{ pageCount }}</small>
+          <button type="button" [disabled]="currentPage === pageCount" (click)="nextPage()">
+            Next <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </footer>
+    </section>
+
+    <aside class="booking-details-column" aria-label="Selected booking details">
+      @if (selectedBooking; as booking) {
+        <section class="booking-detail-card">
+          <div class="detail-booking-heading">
+            <strong>{{ booking.bookingId }}</strong>
+            <span
+              class="status-badge"
+              [ngClass]="'status-' + booking.status.toLowerCase().replace(' ', '-')"
+            >
+              {{ booking.status }}
+            </span>
+          </div>
+          <h2>{{ booking.guestName }}</h2>
+          <div class="guest-contact">
+            <a [href]="'mailto:' + booking.email">{{ booking.email }}</a>
+            <a [href]="'tel:' + booking.phone">{{ booking.phone }}</a>
+            <small
+              >Guest account · {{ booking.adults }} adults · {{ booking.children }} children</small
+            >
+            @if (booking.travelingWithPets) {
+              <small>Guest preference: traveling with pets</small>
+            }
+          </div>
+          <dl class="booking-detail-list">
+            <div>
+              <dt>Room</dt>
+              <dd>{{ booking.room }}</dd>
+            </div>
+            <div>
+              <dt>Check-in</dt>
+              <dd>{{ formatDate(booking.checkIn) }}</dd>
+            </div>
+            <div>
+              <dt>Check-out</dt>
+              <dd>{{ formatDate(booking.checkOut) }}</dd>
+            </div>
+            <div>
+              <dt>Fixed rate</dt>
+              <dd>
+                {{ formatCurrency(booking.total / getNights(booking)) }} ×
+                {{ getNights(booking) }} nights
+              </dd>
+            </div>
+            <div class="detail-total">
+              <dt>Total · MYR</dt>
+              <dd>{{ formatCurrency(booking.total) }}</dd>
+            </div>
+          </dl>
+          @if (booking.status === 'Confirmed' && canCheckIn(booking)) {
+            <div class="detail-actions">
+              <button type="button" class="primary-action" (click)="handleBookingAction(booking)">
+                Check in guest
+              </button>
+              @if (canCancel(booking)) {
+                <button type="button" class="secondary-action" (click)="openCancelConfirmation()">
+                  Cancel booking...
+                </button>
+              }
+            </div>
+          }
+          @if (booking.status === 'Confirmed' && !canCheckIn(booking)) {
+            <div class="detail-actions">
+              <p class="booking-note">
+                Check-in is available on {{ formatDate(booking.checkIn) }}.
+              </p>
+              @if (canCancel(booking)) {
+                <button type="button" class="secondary-action" (click)="openCancelConfirmation()">
+                  Cancel booking...
+                </button>
+              }
+            </div>
+          }
+          @if (booking.status === 'Checked in') {
+            <div class="detail-actions">
+              <button type="button" class="primary-action" (click)="handleBookingAction(booking)">
+                Check out guest
+              </button>
+            </div>
+          }
+          @if (booking.status === 'Checked out' || booking.status === 'Cancelled') {
+            <p class="booking-note">
+              This booking is {{ booking.status.toLowerCase() }} and read-only.
+            </p>
+          }
+          <p class="detail-footnote">
+            Check-out becomes available after check-in. Cancelled and completed bookings are
+            read-only.
+          </p>
         </section>
+      }
 
-        <aside class="booking-details-column" aria-label="Selected booking details">
-            <section *ngIf="selectedBooking as booking" class="booking-detail-card">
-                <div class="detail-booking-heading">
-                    <strong>{{ booking.bookingId }}</strong>
-                    <span class="status-badge" [ngClass]="'status-' + booking.status.toLowerCase().replace(' ', '-')">
-                        {{ booking.status }}
-                    </span>
-                </div>
-                <h2>{{ booking.guestName }}</h2>
-                <div class="guest-contact">
-                    <a [href]="'mailto:' + booking.email">{{ booking.email }}</a>
-                    <a [href]="'tel:' + booking.phone">{{ booking.phone }}</a>
-                    <small>Guest account · {{ booking.adults }} adults · {{ booking.children }} children</small>
-                    <small *ngIf="booking.travelingWithPets">Guest preference: traveling with pets</small>
-                </div>
-
-                <dl class="booking-detail-list">
-                    <div>
-                        <dt>Room</dt>
-                        <dd>{{ booking.room }}</dd>
-                    </div>
-                    <div>
-                        <dt>Check-in</dt>
-                        <dd>{{ formatDate(booking.checkIn) }}</dd>
-                    </div>
-                    <div>
-                        <dt>Check-out</dt>
-                        <dd>{{ formatDate(booking.checkOut) }}</dd>
-                    </div>
-                    <div>
-                        <dt>Fixed rate</dt>
-                        <dd>{{ formatCurrency(booking.total / getNights(booking)) }} × {{ getNights(booking) }} nights</dd>
-                    </div>
-                    <div class="detail-total">
-                        <dt>Total · MYR</dt>
-                        <dd>{{ formatCurrency(booking.total) }}</dd>
-                    </div>
-                </dl>
-
-                <div *ngIf="booking.status === 'Confirmed' && canCheckIn(booking)" class="detail-actions">
-                    <button type="button" class="primary-action" (click)="handleBookingAction(booking)">Check in guest</button>
-                    <button *ngIf="canCancel(booking)" type="button" class="secondary-action" (click)="openCancelConfirmation()">Cancel booking...</button>
-                </div>
-                <div *ngIf="booking.status === 'Confirmed' && !canCheckIn(booking)" class="detail-actions">
-                    <p class="booking-note">Check-in is available on {{ formatDate(booking.checkIn) }}.</p>
-                    <button *ngIf="canCancel(booking)" type="button" class="secondary-action" (click)="openCancelConfirmation()">Cancel booking...</button>
-                </div>
-                <div *ngIf="booking.status === 'Checked in'" class="detail-actions">
-                    <button type="button" class="primary-action" (click)="handleBookingAction(booking)">Check out guest</button>
-                </div>
-                <p *ngIf="booking.status === 'Checked out' || booking.status === 'Cancelled'" class="booking-note">
-                    This booking is {{ booking.status.toLowerCase() }} and read-only.
-                </p>
-                <p class="detail-footnote">Check-out becomes available after check-in. Cancelled and completed bookings are read-only.</p>
-            </section>
-
-            <section *ngIf="selectedBooking && cancelConfirmationOpen" class="cancel-confirmation" aria-labelledby="cancel-heading">
-                <h2 id="cancel-heading">Cancel {{ selectedBooking.bookingId }}?</h2>
-                <p>{{ selectedBooking.guestName }}'s room will be released for {{ formatDate(selectedBooking.checkIn) }}–{{ formatDate(selectedBooking.checkOut) }}. The booking will be marked Cancelled. This cannot be undone.</p>
-                <div class="cancel-confirmation-actions">
-                    <button type="button" class="secondary-action" (click)="keepBooking()">Keep booking</button>
-                    <button type="button" class="danger-action" (click)="confirmCancellation(selectedBooking)">Confirm cancel</button>
-                </div>
-            </section>
-        </aside>
-    </div>
+      @if (selectedBooking && cancelConfirmationOpen) {
+        <section class="cancel-confirmation" aria-labelledby="cancel-heading">
+          <h2 id="cancel-heading">Cancel {{ selectedBooking.bookingId }}?</h2>
+          <p>
+            {{ selectedBooking.guestName }}'s room will be released for
+            {{ formatDate(selectedBooking.checkIn) }}–{{ formatDate(selectedBooking.checkOut) }}.
+            The booking will be marked Cancelled. This cannot be undone.
+          </p>
+          <div class="cancel-confirmation-actions">
+            <button type="button" class="secondary-action" (click)="keepBooking()">
+              Keep booking
+            </button>
+            <button
+              type="button"
+              class="danger-action"
+              (click)="confirmCancellation(selectedBooking)"
+            >
+              Confirm cancel
+            </button>
+          </div>
+        </section>
+      }
+    </aside>
+  </div>
 </div>

@@ -1,78 +1,199 @@
 <div class="register-container">
   <header>
-    <img style="width:90px; padding: 10px 0;" src="haven-full-logo.png" alt="Logo">
+    <img style="width: 90px; padding: 10px 0" src="haven-full-logo.png" alt="Logo" />
     <p>Log in to start booking!</p>
   </header>
 
   <div class="main-section">
     <div id="login-container">
-      <p style="font-weight: bold; font-size: 0.70rem; color:#52634B">GUEST ACCOUNT</p>
-      <h1 style="margin: 15px 0;">Make yourself at home.</h1>
-      <p style="font-size: 0.9rem; color:#74796F;">Create an account to book and manage your stays.</p>
+      <p style="font-weight: bold; font-size: 0.7rem; color: #52634b">GUEST ACCOUNT</p>
+      <h1 style="margin: 15px 0">Make yourself at home.</h1>
+      <p style="font-size: 0.9rem; color: #74796f">
+        Create an account to book and manage your stays.
+      </p>
 
       <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-        <p *ngIf="errorMessage" class="form-error" role="alert" aria-live="assertive">{{ errorMessage }}</p>
-        <p *ngIf="successMessage" class="form-success" role="status" aria-live="polite">{{ successMessage }}</p>
+        @if (errorMessage) {
+          <p class="form-error" role="alert" aria-live="assertive">{{ errorMessage }}</p>
+        }
+        @if (successMessage) {
+          <p class="form-success" role="status" aria-live="polite">{{ successMessage }}</p>
+        }
 
         <!-- First Name and Last Name -->
         <div class="form-row">
           <div class="form-group">
             <label for="first-name">First Name</label>
-            <input type="text" id="first-name" formControlName="firstName" placeholder="Enter first name" autocomplete="given-name" [attr.aria-invalid]="registerForm.get('firstName')?.touched && registerForm.get('firstName')?.invalid">
-            <small *ngIf="registerForm.get('firstName')?.touched && registerForm.get('firstName')?.hasError('required')" class="field-error">First name is required.</small>
-            <small *ngIf="registerForm.get('firstName')?.touched && registerForm.get('firstName')?.hasError('minlength')" class="field-error">Enter at least 2 characters.</small>
+            <input
+              type="text"
+              id="first-name"
+              formControlName="firstName"
+              placeholder="Enter first name"
+              autocomplete="given-name"
+              [attr.aria-invalid]="
+                registerForm.get('firstName')?.touched && registerForm.get('firstName')?.invalid
+              "
+            />
+            @if (
+              registerForm.get('firstName')?.touched &&
+              registerForm.get('firstName')?.hasError('required')
+            ) {
+              <small class="field-error">First name is required.</small>
+            }
+            @if (
+              registerForm.get('firstName')?.touched &&
+              registerForm.get('firstName')?.hasError('minlength')
+            ) {
+              <small class="field-error">Enter at least 2 characters.</small>
+            }
           </div>
           <div class="form-group">
             <label for="last-name">Last Name</label>
-            <input type="text" id="last-name" formControlName="lastName" placeholder="Enter last name" autocomplete="family-name" [attr.aria-invalid]="registerForm.get('lastName')?.touched && registerForm.get('lastName')?.invalid">
-            <small *ngIf="registerForm.get('lastName')?.touched && registerForm.get('lastName')?.hasError('required')" class="field-error">Last name is required.</small>
-            <small *ngIf="registerForm.get('lastName')?.touched && registerForm.get('lastName')?.hasError('minlength')" class="field-error">Enter at least 2 characters.</small>
+            <input
+              type="text"
+              id="last-name"
+              formControlName="lastName"
+              placeholder="Enter last name"
+              autocomplete="family-name"
+              [attr.aria-invalid]="
+                registerForm.get('lastName')?.touched && registerForm.get('lastName')?.invalid
+              "
+            />
+            @if (
+              registerForm.get('lastName')?.touched &&
+              registerForm.get('lastName')?.hasError('required')
+            ) {
+              <small class="field-error">Last name is required.</small>
+            }
+            @if (
+              registerForm.get('lastName')?.touched &&
+              registerForm.get('lastName')?.hasError('minlength')
+            ) {
+              <small class="field-error">Enter at least 2 characters.</small>
+            }
           </div>
         </div>
 
         <!-- Email -->
         <div class="form-group">
           <label for="email">Email</label>
-          <input type="email" id="email" formControlName="email" placeholder="example@email.com" autocomplete="email" [attr.aria-invalid]="registerForm.get('email')?.touched && registerForm.get('email')?.invalid">
-          <small *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.hasError('required')" class="field-error">Email is required.</small>
-          <small *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.hasError('email')" class="field-error">Enter a valid email address.</small>
+          <input
+            type="email"
+            id="email"
+            formControlName="email"
+            placeholder="example@email.com"
+            autocomplete="email"
+            [attr.aria-invalid]="
+              registerForm.get('email')?.touched && registerForm.get('email')?.invalid
+            "
+          />
+          @if (
+            registerForm.get('email')?.touched && registerForm.get('email')?.hasError('required')
+          ) {
+            <small class="field-error">Email is required.</small>
+          }
+          @if (registerForm.get('email')?.touched && registerForm.get('email')?.hasError('email')) {
+            <small class="field-error">Enter a valid email address.</small>
+          }
         </div>
 
         <!-- Phone Number -->
         <div class="form-group">
           <label for="phone">Phone Number</label>
-          <input type="tel" id="phone" formControlName="phone" placeholder="Enter phone number" autocomplete="tel" [attr.aria-invalid]="registerForm.get('phone')?.touched && registerForm.get('phone')?.invalid">
+          <input
+            type="tel"
+            id="phone"
+            formControlName="phone"
+            placeholder="Enter phone number"
+            autocomplete="tel"
+            [attr.aria-invalid]="
+              registerForm.get('phone')?.touched && registerForm.get('phone')?.invalid
+            "
+          />
           <small class="hint">Include your country code.</small>
-          <small *ngIf="registerForm.get('phone')?.touched && registerForm.get('phone')?.invalid" class="field-error">Enter a valid phone number (8–15 digits, optionally starting with +).</small>
+          @if (registerForm.get('phone')?.touched && registerForm.get('phone')?.invalid) {
+            <small class="field-error"
+              >Enter a valid phone number (8–15 digits, optionally starting with +).</small
+            >
+          }
         </div>
 
         <!-- Password -->
         <div class="form-row">
           <div class="form-group">
             <label for="password">Password</label>
-            <input type="password" id="password" formControlName="password" placeholder="Enter password" autocomplete="new-password" [attr.aria-invalid]="registerForm.get('password')?.touched && registerForm.get('password')?.invalid">
-            <small *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.hasError('required')" class="field-error">Password is required.</small>
-            <small *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.hasError('minlength')" class="field-error">Password must be at least 8 characters.</small>
+            <input
+              type="password"
+              id="password"
+              formControlName="password"
+              placeholder="Enter password"
+              autocomplete="new-password"
+              [attr.aria-invalid]="
+                registerForm.get('password')?.touched && registerForm.get('password')?.invalid
+              "
+            />
+            @if (
+              registerForm.get('password')?.touched &&
+              registerForm.get('password')?.hasError('required')
+            ) {
+              <small class="field-error">Password is required.</small>
+            }
+            @if (
+              registerForm.get('password')?.touched &&
+              registerForm.get('password')?.hasError('minlength')
+            ) {
+              <small class="field-error">Password must be at least 8 characters.</small>
+            }
           </div>
           <div class="form-group">
             <label for="confirm-password">Confirm Password</label>
-            <input type="password" id="confirm-password" formControlName="confirmPassword" placeholder="Confirm password" autocomplete="new-password" [attr.aria-invalid]="registerForm.get('confirmPassword')?.touched && (registerForm.get('confirmPassword')?.invalid || registerForm.hasError('passwordsMismatch'))">
-            <small *ngIf="registerForm.get('confirmPassword')?.touched && registerForm.get('confirmPassword')?.hasError('required')" class="field-error">Please confirm your password.</small>
-            <small *ngIf="registerForm.get('confirmPassword')?.touched && registerForm.hasError('passwordsMismatch')" class="field-error">Passwords do not match.</small>
+            <input
+              type="password"
+              id="confirm-password"
+              formControlName="confirmPassword"
+              placeholder="Confirm password"
+              autocomplete="new-password"
+              [attr.aria-invalid]="
+                registerForm.get('confirmPassword')?.touched &&
+                (registerForm.get('confirmPassword')?.invalid ||
+                  registerForm.hasError('passwordsMismatch'))
+              "
+            />
+            @if (
+              registerForm.get('confirmPassword')?.touched &&
+              registerForm.get('confirmPassword')?.hasError('required')
+            ) {
+              <small class="field-error">Please confirm your password.</small>
+            }
+            @if (
+              registerForm.get('confirmPassword')?.touched &&
+              registerForm.hasError('passwordsMismatch')
+            ) {
+              <small class="field-error">Passwords do not match.</small>
+            }
           </div>
         </div>
 
-        <small class="hint">All fields are required. Use at least 8 characters for your password. Both passwords must match before you can create your account.</small>
+        <small class="hint"
+          >All fields are required. Use at least 8 characters for your password. Both passwords must
+          match before you can create your account.</small
+        >
 
-        <br>
-        
+        <br />
+
         <button type="submit" [disabled]="isSubmitting || !!successMessage">
-          {{ isSubmitting ? 'Creating account…' : successMessage ? 'Account created' : 'Create guest account' }}
+          {{
+            isSubmitting
+              ? 'Creating account…'
+              : successMessage
+                ? 'Account created'
+                : 'Create guest account'
+          }}
         </button>
       </form>
 
       <div class="login-link">
-        <p style="color:#74796F;">Already have an account? <a routerLink="/">Sign in</a></p>
+        <p style="color: #74796f">Already have an account? <a routerLink="/">Sign in</a></p>
       </div>
     </div>
   </div>

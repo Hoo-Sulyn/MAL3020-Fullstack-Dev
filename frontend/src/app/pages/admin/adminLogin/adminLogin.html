@@ -1,33 +1,61 @@
 <div class="login-container">
   <header>
-    <img style="width:135px; padding: 10px 0;" src="haven-full-admin-logo.png" alt="Logo">
+    <img style="width: 135px; padding: 10px 0" src="haven-full-admin-logo.png" alt="Logo" />
     <p>Log in to start managing!</p>
   </header>
 
   <div class="main-section">
     <div id="login-container">
-      <p style="font-weight: bold; font-size: 0.70rem; color:#52634B">STAFF WORKSPACE</p>
-      <h1 style="margin: 15px 0;">Hello, team haven.</h1>
-      <p style="font-size: 0.9rem; color:#74796F;">Sign in to manage rooms and guest bookings.</p>
+      <p style="font-weight: bold; font-size: 0.7rem; color: #52634b">STAFF WORKSPACE</p>
+      <h1 style="margin: 15px 0">Hello, team haven.</h1>
+      <p style="font-size: 0.9rem; color: #74796f">Sign in to manage rooms and guest bookings.</p>
 
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-        <p *ngIf="errorMessage()" class="form-error" role="alert" aria-live="assertive">{{ errorMessage() }}</p>
+        @if (errorMessage()) {
+          <p class="form-error" role="alert" aria-live="assertive">{{ errorMessage() }}</p>
+        }
 
         <!-- Email -->
         <div class="form-group">
           <label for="email">Staff email address</label>
-          <input type="email" id="email" formControlName="email" placeholder="Enter staff email" autocomplete="username" (input)="clearError()" [attr.aria-invalid]="loginForm.get('email')?.touched && loginForm.get('email')?.invalid">
-          <small *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.hasError('required')" class="field-error">Staff email is required.</small>
-          <small *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.hasError('email')" class="field-error">Enter a valid staff email address.</small>
+          <input
+            type="email"
+            id="email"
+            formControlName="email"
+            placeholder="Enter staff email"
+            autocomplete="username"
+            (input)="clearError()"
+            [attr.aria-invalid]="loginForm.get('email')?.touched && loginForm.get('email')?.invalid"
+          />
+          @if (loginForm.get('email')?.touched && loginForm.get('email')?.hasError('required')) {
+            <small class="field-error">Staff email is required.</small>
+          }
+          @if (loginForm.get('email')?.touched && loginForm.get('email')?.hasError('email')) {
+            <small class="field-error">Enter a valid staff email address.</small>
+          }
         </div>
 
         <!-- Password -->
         <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" id="password" formControlName="password" placeholder="Enter password" autocomplete="current-password" (input)="clearError()" [attr.aria-invalid]="loginForm.get('password')?.touched && loginForm.get('password')?.invalid">
-          <small *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required')" class="field-error">Password is required.</small>
+          <input
+            type="password"
+            id="password"
+            formControlName="password"
+            placeholder="Enter password"
+            autocomplete="current-password"
+            (input)="clearError()"
+            [attr.aria-invalid]="
+              loginForm.get('password')?.touched && loginForm.get('password')?.invalid
+            "
+          />
+          @if (
+            loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required')
+          ) {
+            <small class="field-error">Password is required.</small>
+          }
         </div>
-        
+
         <button type="submit" [disabled]="isSubmitting()">
           {{ isSubmitting() ? 'Signing in…' : 'Sign in to staff workspace' }}
         </button>
@@ -36,14 +64,17 @@
       <div id="divider"></div>
 
       <div id="admin-notice">
-        <img src="secure-icon.png" alt="Secure Icon">
-        <p>For authorised hotel staff only. Staff accounts are provided by haven; guest accounts cannot access this workspace.</p>
+        <img src="secure-icon.png" alt="Secure Icon" />
+        <p>
+          For authorised hotel staff only. Staff accounts are provided by haven; guest accounts
+          cannot access this workspace.
+        </p>
       </div>
     </div>
 
-    <div class="guest-link" style="margin-top: 15px;">
+    <div class="guest-link" style="margin-top: 15px">
       <a routerLink="/">← Back to guest login</a>
-    </div>  
+    </div>
 
     <small id="staff-note">Need staff access? Contact your hotel manager.</small>
   </div>

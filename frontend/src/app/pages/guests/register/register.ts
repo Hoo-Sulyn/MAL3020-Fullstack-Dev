@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ChangeDetectorRef } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
@@ -25,7 +25,7 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
 @Component({
   selector: 'app-guest-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './register.html',
   styleUrl: './register.css',
 })
@@ -39,7 +39,7 @@ export class GuestRegister {
     private fb: FormBuilder,
     private auth: AuthService,
     private router: Router,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {
     this.registerForm = this.fb.group(
       {
@@ -50,14 +50,15 @@ export class GuestRegister {
         password: ['', [Validators.required, Validators.minLength(8)]],
         confirmPassword: ['', [Validators.required]],
       },
-      { validators: passwordMatchValidator }
+      { validators: passwordMatchValidator },
     );
   }
 
   onSubmit(): void {
     if (this.registerForm.invalid || this.isSubmitting) {
       this.registerForm.markAllAsTouched();
-      this.errorMessage = 'Please complete all required fields correctly before creating your account.';
+      this.errorMessage =
+        'Please complete all required fields correctly before creating your account.';
       return;
     }
 
@@ -67,27 +68,30 @@ export class GuestRegister {
 
     const { firstName, lastName, email, phone, password } = this.registerForm.getRawValue();
 
-    this.auth.register({
-      firstName,
-      lastName,
-      email,
-      phone,
-      password,
-    }).subscribe({
-      next: () => {
-        this.successMessage = 'Account created successfully. Redirecting to sign in...';
-        this.changeDetector.markForCheck();
-        setTimeout(() => this.router.navigateByUrl('/'), 800);
-      },
-      error: (error: unknown) => {
-        this.errorMessage = error instanceof HttpErrorResponse && error.status === 409
-          ? 'An account with this email already exists. Please sign in or use a different email.'
-          : error instanceof HttpErrorResponse && typeof error.error?.message === 'string'
-            ? error.error.message
-            : 'Unable to create your account right now.';
-        this.isSubmitting = false;
-        this.changeDetector.markForCheck();
-      },
-    });
+    this.auth
+      .register({
+        firstName,
+        lastName,
+        email,
+        phone,
+        password,
+      })
+      .subscribe({
+        next: () => {
+          this.successMessage = 'Account created successfully. Redirecting to sign in...';
+          this.changeDetector.markForCheck();
+          setTimeout(() => this.router.navigateByUrl('/'), 800);
+        },
+        error: (error: unknown) => {
+          this.errorMessage =
+            error instanceof HttpErrorResponse && error.status === 409
+              ? 'An account with this email already exists. Please sign in or use a different email.'
+              : error instanceof HttpErrorResponse && typeof error.error?.message === 'string'
+                ? error.error.message
+                : 'Unable to create your account right now.';
+          this.isSubmitting = false;
+          this.changeDetector.markForCheck();
+        },
+      });
   }
 }

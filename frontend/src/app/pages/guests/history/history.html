@@ -1,102 +1,161 @@
 <div id="history-container">
-    <h1>Your stays at haven</h1>
-    <small>Your current, past and cancelled bookings, all in one place.</small>
+  <h1>Your stays at haven</h1>
+  <small>Your current, past and cancelled bookings, all in one place.</small>
 
-    <p>{{ guestName }} • Guest account • As of {{ todayLabel }}</p>
-    <p *ngIf="successMessage" class="booking-success" role="status">{{ successMessage }}</p>
-    <p *ngIf="errorMessage" class="booking-error" role="alert">{{ errorMessage }}</p>
-    <p *ngIf="isLoading" role="status">Loading your bookings…</p>
+  <p>{{ guestName }} • Guest account • As of {{ todayLabel }}</p>
+  @if (successMessage) {
+    <p class="booking-success" role="status">{{ successMessage }}</p>
+  }
+  @if (errorMessage) {
+    <p class="booking-error" role="alert">{{ errorMessage }}</p>
+  }
+  @if (isLoading) {
+    <p role="status">Loading your bookings…</p>
+  }
 
-    <div class="main-container">
-        <div id="booking-history-container">
-            <section class="booking-history-cards" id="current-bookings">
-                <h2>Current & upcoming • {{ currentAndUpcomingBookings.length }}</h2>
-                <article class="booking-details-card" *ngFor="let booking of currentAndUpcomingBookings">
-                    <div class="booking-details">
-                        <p>{{ booking.room }}</p>
-                        <small>{{ booking.bookingId }}</small>
-                    </div>
-                    <div class="booking-details">
-                        <p>{{ formatDate(booking.checkIn) }} → {{ formatDate(booking.checkOut) }}</p>
-                        <small>{{ getNights(booking) }} night(s) · {{ booking.adults + booking.children }} guest(s)</small>
-                        <small *ngIf="booking.travelingWithPets">Traveling with pets</small>
-                    </div>
-                    <div class="booking-details">
-                        <p>{{ booking.status }}</p>
-                        <small>RM {{ booking.total | number:'1.2-2' }}</small>
-                    </div>
-                    <div class="booking-details">
-                        <button *ngIf="canCancel(booking)" type="button" class="history-cancel-button" (click)="openCancellation(booking)">
-                            Cancel booking
-                        </button>
-                        <button
-                            type="button"
-                            class="history-details-button"
-                            (click)="canEdit(booking) ? editBooking(booking) : showBookingDetails(booking)">
-                            {{ canEdit(booking) ? 'Edit details' : 'Show details' }}
-                        </button>
-                    </div>
-                </article>
-                <p *ngIf="!isLoading && !errorMessage && currentAndUpcomingBookings.length === 0" class="history-empty">No current or upcoming bookings.</p>
-            </section>
-
-            <section class="booking-history-cards" id="past-bookings">
-                <h2>Past • {{ pastBookings.length }}</h2>
-                <article class="booking-details-card" *ngFor="let booking of pastBookings">
-                    <div class="booking-details">
-                        <p>{{ booking.room }}</p>
-                        <small>{{ booking.bookingId }}</small>
-                    </div>
-                    <div class="booking-details">
-                        <p>{{ formatDate(booking.checkIn) }} → {{ formatDate(booking.checkOut) }}</p>
-                        <small>{{ getNights(booking) }} night(s) · {{ booking.adults + booking.children }} guest(s)</small>
-                    </div>
-                    <div class="booking-details">
-                        <p>{{ booking.status }}</p>
-                        <small>RM {{ booking.total | number:'1.2-2' }}</small>
-                    </div>
-                    <div class="booking-details">
-                        <button type="button" class="history-details-button" (click)="showBookingDetails(booking)">Show details</button>
-                    </div>
-                </article>
-                <p *ngIf="!isLoading && !errorMessage && pastBookings.length === 0" class="history-empty">No past bookings.</p>
-            </section>
-
-            <section class="booking-history-cards" id="cancelled-bookings">
-                <h2>Cancelled • {{ cancelledBookings.length }}</h2>
-                <article class="booking-details-card" *ngFor="let booking of cancelledBookings">
-                    <div class="booking-details">
-                        <p>{{ booking.room }}</p>
-                        <small>{{ booking.bookingId }}</small>
-                    </div>
-                    <div class="booking-details">
-                        <p>{{ formatDate(booking.checkIn) }} → {{ formatDate(booking.checkOut) }}</p>
-                        <small>{{ getNights(booking) }} night(s)</small>
-                    </div>
-                    <div class="booking-details">
-                        <p>{{ booking.status }}</p>
-                        <small>RM {{ booking.total | number:'1.2-2' }}</small>
-                    </div>
-                    <div class="booking-details">
-                        <button type="button" class="history-details-button" (click)="showBookingDetails(booking)">Show details</button>
-                    </div>
-                </article>
-                <p *ngIf="!isLoading && !errorMessage && cancelledBookings.length === 0" class="history-empty">No cancelled bookings.</p>
-            </section>
-        </div>
-
-        <aside id="confirmation-container" *ngIf="selectedBooking">
-            <div class="cancel-booking-container">
-                <small id="highlighted-note">Cancellation confirmation</small>
-                <h3>Cancel {{ selectedBooking.bookingId }}?</h3>
-                <small>{{ selectedBooking.room }} · {{ formatDate(selectedBooking.checkIn) }}–{{ formatDate(selectedBooking.checkOut) }}</small>
-                <div class="divider"></div>
-                <p id="cancellation-warning">Your room will be released and this booking will move to Cancelled. This action cannot be undone.</p>
-                <button type="button" id="keep-booking-btn" (click)="keepBooking()">Keep booking</button>
-                <button type="button" id="cancel-booking-btn" [disabled]="isCancelling" (click)="confirmCancellation()">
-                    {{ isCancelling ? 'Cancelling…' : 'Yes, cancel booking' }}
-                </button>
+  <div class="main-container">
+    <div id="booking-history-container">
+      <section class="booking-history-cards" id="current-bookings">
+        <h2>Current & upcoming • {{ currentAndUpcomingBookings.length }}</h2>
+        @for (booking of currentAndUpcomingBookings; track booking) {
+          <article class="booking-details-card">
+            <div class="booking-details">
+              <p>{{ booking.room }}</p>
+              <small>{{ booking.bookingId }}</small>
             </div>
-        </aside>
+            <div class="booking-details">
+              <p>{{ formatDate(booking.checkIn) }} → {{ formatDate(booking.checkOut) }}</p>
+              <small
+                >{{ getNights(booking) }} night(s) ·
+                {{ booking.adults + booking.children }} guest(s)</small
+              >
+              @if (booking.travelingWithPets) {
+                <small>Traveling with pets</small>
+              }
+            </div>
+            <div class="booking-details">
+              <p>{{ booking.status }}</p>
+              <small>RM {{ booking.total | number: '1.2-2' }}</small>
+            </div>
+            <div class="booking-details">
+              @if (canCancel(booking)) {
+                <button
+                  type="button"
+                  class="history-cancel-button"
+                  (click)="openCancellation(booking)"
+                >
+                  Cancel booking
+                </button>
+              }
+              <button
+                type="button"
+                class="history-details-button"
+                (click)="canEdit(booking) ? editBooking(booking) : showBookingDetails(booking)"
+              >
+                {{ canEdit(booking) ? 'Edit details' : 'Show details' }}
+              </button>
+            </div>
+          </article>
+        }
+        @if (!isLoading && !errorMessage && currentAndUpcomingBookings.length === 0) {
+          <p class="history-empty">No current or upcoming bookings.</p>
+        }
+      </section>
+
+      <section class="booking-history-cards" id="past-bookings">
+        <h2>Past • {{ pastBookings.length }}</h2>
+        @for (booking of pastBookings; track booking) {
+          <article class="booking-details-card">
+            <div class="booking-details">
+              <p>{{ booking.room }}</p>
+              <small>{{ booking.bookingId }}</small>
+            </div>
+            <div class="booking-details">
+              <p>{{ formatDate(booking.checkIn) }} → {{ formatDate(booking.checkOut) }}</p>
+              <small
+                >{{ getNights(booking) }} night(s) ·
+                {{ booking.adults + booking.children }} guest(s)</small
+              >
+            </div>
+            <div class="booking-details">
+              <p>{{ booking.status }}</p>
+              <small>RM {{ booking.total | number: '1.2-2' }}</small>
+            </div>
+            <div class="booking-details">
+              <button
+                type="button"
+                class="history-details-button"
+                (click)="showBookingDetails(booking)"
+              >
+                Show details
+              </button>
+            </div>
+          </article>
+        }
+        @if (!isLoading && !errorMessage && pastBookings.length === 0) {
+          <p class="history-empty">No past bookings.</p>
+        }
+      </section>
+
+      <section class="booking-history-cards" id="cancelled-bookings">
+        <h2>Cancelled • {{ cancelledBookings.length }}</h2>
+        @for (booking of cancelledBookings; track booking) {
+          <article class="booking-details-card">
+            <div class="booking-details">
+              <p>{{ booking.room }}</p>
+              <small>{{ booking.bookingId }}</small>
+            </div>
+            <div class="booking-details">
+              <p>{{ formatDate(booking.checkIn) }} → {{ formatDate(booking.checkOut) }}</p>
+              <small>{{ getNights(booking) }} night(s)</small>
+            </div>
+            <div class="booking-details">
+              <p>{{ booking.status }}</p>
+              <small>RM {{ booking.total | number: '1.2-2' }}</small>
+            </div>
+            <div class="booking-details">
+              <button
+                type="button"
+                class="history-details-button"
+                (click)="showBookingDetails(booking)"
+              >
+                Show details
+              </button>
+            </div>
+          </article>
+        }
+        @if (!isLoading && !errorMessage && cancelledBookings.length === 0) {
+          <p class="history-empty">No cancelled bookings.</p>
+        }
+      </section>
     </div>
+
+    @if (selectedBooking) {
+      <aside id="confirmation-container">
+        <div class="cancel-booking-container">
+          <small id="highlighted-note">Cancellation confirmation</small>
+          <h3>Cancel {{ selectedBooking.bookingId }}?</h3>
+          <small
+            >{{ selectedBooking.room }} · {{ formatDate(selectedBooking.checkIn) }}–{{
+              formatDate(selectedBooking.checkOut)
+            }}</small
+          >
+          <div class="divider"></div>
+          <p id="cancellation-warning">
+            Your room will be released and this booking will move to Cancelled. This action cannot
+            be undone.
+          </p>
+          <button type="button" id="keep-booking-btn" (click)="keepBooking()">Keep booking</button>
+          <button
+            type="button"
+            id="cancel-booking-btn"
+            [disabled]="isCancelling"
+            (click)="confirmCancellation()"
+          >
+            {{ isCancelling ? 'Cancelling…' : 'Yes, cancel booking' }}
+          </button>
+        </div>
+      </aside>
+    }
+  </div>
 </div>

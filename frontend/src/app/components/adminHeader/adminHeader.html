@@ -1,23 +1,31 @@
 <header>
-        <img style="width:135px; padding: 10px 0;" src="haven-full-admin-logo.png" alt="Logo">
-        
-        <div class="nav">
-            <a id="dashboard" routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
-            <a id="room-management" routerLink="/roomManagement" routerLinkActive="active">Room Management</a>
-            <a id="booking-management" routerLink="/bookingManagement" routerLinkActive="active">Bookings Management</a>
-        </div>
+  <img style="width: 135px; padding: 10px 0" src="haven-full-admin-logo.png" alt="Logo" />
 
-        <div class="currency-user">
-            <p id="currency" title="Ringgit Malaysia (RM)">MYR</p>
+  <div class="nav">
+    <a id="dashboard" routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+    <a id="room-management" routerLink="/roomManagement" routerLinkActive="active"
+      >Room Management</a
+    >
+    <a id="booking-management" routerLink="/bookingManagement" routerLinkActive="active"
+      >Bookings Management</a
+    >
+  </div>
 
-            <a *ngIf="!adminUser" id="user-profile" routerLink="/adminLogin" aria-label="Admin sign in">
-                <img src="user-icon.png" alt="User icon">
-                <p id="user-name">Sign in</p>
-            </a>
+  <div class="currency-user">
+    <p id="currency" title="Ringgit Malaysia (RM)">MYR</p>
 
-            <div *ngIf="adminUser as user" id="user-sign-out">
-                <p id="admin-name">{{ user.firstName }} {{ user.lastName }}</p>
-                <button type="button" id="sign-out-btn" (click)="signOut()">Sign out</button>
-            </div>
-        </div>
-  </header>
+    @if (!adminUser) {
+      <a id="user-profile" routerLink="/adminLogin" aria-label="Admin sign in">
+        <img src="user-icon.png" alt="User icon" />
+        <p id="user-name">Sign in</p>
+      </a>
+    }
+
+    @if (adminUser; as user) {
+      <div id="user-sign-out">
+        <p id="admin-name">{{ user.firstName }} {{ user.lastName }}</p>
+        <button type="button" id="sign-out-btn" (click)="signOut()">Sign out</button>
+      </div>
+    }
+  </div>
+</header>

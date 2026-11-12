@@ -1,153 +1,204 @@
 <div id="booking-container">
   <div class="main-container">
     <h1>Available rooms at haven</h1>
-    <p style="font-size: 0.9rem; padding-bottom: 10px;">Browse all rooms, or choose dates and guest count to check availability for your stay.</p>
+    <p style="font-size: 0.9rem; padding-bottom: 10px">
+      Browse all rooms, or choose dates and guest count to check availability for your stay.
+    </p>
 
     <form [formGroup]="searchForm" (ngSubmit)="onSubmit()">
-
-        <!-- Check in -->
-        <div class="search-field">
-            <img src="calendar-icon.png" alt="Calendar icon">
-            <div class="field-container">
-                <label for="check-in">Check-in</label>
-                <input type="date" id="check-in" formControlName="check-in" [min]="today" (change)="onCheckInChange()">
-            </div>
+      <!-- Check in -->
+      <div class="search-field">
+        <img src="calendar-icon.png" alt="Calendar icon" />
+        <div class="field-container">
+          <label for="check-in">Check-in</label>
+          <input
+            type="date"
+            id="check-in"
+            formControlName="check-in"
+            [min]="today"
+            (change)="onCheckInChange()"
+          />
         </div>
+      </div>
 
-        <div class="divider"></div>
+      <div class="divider"></div>
 
-        <!-- Check out -->
-        <div class="search-field">
-            <img src="calendar-icon.png" alt="Calendar icon">
-            <div class="field-container">
-                <label for="check-out">Check-out</label>
-                <input type="date" id="check-out" formControlName="check-out" [min]="checkOutMin">
-            </div>
+      <!-- Check out -->
+      <div class="search-field">
+        <img src="calendar-icon.png" alt="Calendar icon" />
+        <div class="field-container">
+          <label for="check-out">Check-out</label>
+          <input type="date" id="check-out" formControlName="check-out" [min]="checkOutMin" />
         </div>
+      </div>
 
-        <div class="divider"></div>
+      <div class="divider"></div>
 
-        <!-- Num guests & room -->
-        <div class="dropdown-container" (click)="$event.stopPropagation()">
-            <button
-                type="button"
-                id="dropdown-btn"
-                aria-haspopup="dialog"
-                [attr.aria-expanded]="occupancyDropdownOpen"
-                (click)="toggleOccupancyDropdown()">
-                <img src="two-users-icon.png" alt="">
-                <span class="occupancy-trigger-copy">
-                    <span class="occupancy-trigger-label">Guests</span>
-                    <span class="occupancy-trigger-summary">
-                        {{ adults }} {{ adults === 1 ? 'adult' : 'adults' }} ·
-                        {{ children }} {{ children === 1 ? 'child' : 'children' }}
-                    </span>
-                </span>
-                <span class="dropdown-chevron" [class.is-open]="occupancyDropdownOpen" aria-hidden="true"></span>
-            </button>
-            <div
-                *ngIf="occupancyDropdownOpen"
-                id="dropdown-contents"
-                role="dialog"
-                aria-label="Guests and preferences">
-                <div class="occupancy-row">
-                    <label for="adults-count">Adults</label>
-                    <div class="counter-control">
-                        <button type="button" aria-label="Decrease adults" [disabled]="adults <= 1" (click)="decreaseCount('adults')">−</button>
-                        <output id="adults-count">{{ adults }}</output>
-                        <button type="button" aria-label="Increase adults" (click)="increaseCount('adults')">+</button>
-                    </div>
-                </div>
-
-                <div class="occupancy-row">
-                    <label for="children-count">Children</label>
-                    <div class="counter-control">
-                        <button type="button" aria-label="Decrease children" [disabled]="children <= 0" (click)="decreaseCount('children')">−</button>
-                        <output id="children-count">{{ children }}</output>
-                        <button type="button" aria-label="Increase children" (click)="increaseCount('children')">+</button>
-                    </div>
-                </div>
-
-                <div class="dropdown-divider"></div>
-
-                <div class="preference-row">
-                    <span>Traveling with pets?</span>
-                    <button
-                        type="button"
-                        class="toggle-switch"
-                        role="switch"
-                        aria-label="Traveling with pets"
-                        [attr.aria-checked]="travelingWithPets"
-                        [class.is-active]="travelingWithPets"
-                        (click)="travelingWithPets = !travelingWithPets">
-                        <span></span>
-                    </button>
-                </div>
-
-                <button type="button" class="done-button" (click)="closeOccupancyDropdown()">Done</button>
-            </div>
-        </div>
-
-        <!-- Search button -->
-        <button type="submit" class="search-button" [disabled]="isSearching">
-            <img src="search-icon.png" alt="Search icon">
-            <p style="font-size:0.85rem; color:white; margin:0;">Search</p>
+      <!-- Num guests & room -->
+      <div class="dropdown-container" (click)="$event.stopPropagation()">
+        <button
+          type="button"
+          id="dropdown-btn"
+          aria-haspopup="dialog"
+          [attr.aria-expanded]="occupancyDropdownOpen"
+          (click)="toggleOccupancyDropdown()"
+        >
+          <img src="two-users-icon.png" alt="" />
+          <span class="occupancy-trigger-copy">
+            <span class="occupancy-trigger-label">Guests</span>
+            <span class="occupancy-trigger-summary">
+              {{ adults }} {{ adults === 1 ? 'adult' : 'adults' }} · {{ children }}
+              {{ children === 1 ? 'child' : 'children' }}
+            </span>
+          </span>
+          <span
+            class="dropdown-chevron"
+            [class.is-open]="occupancyDropdownOpen"
+            aria-hidden="true"
+          ></span>
         </button>
+        @if (occupancyDropdownOpen) {
+          <div id="dropdown-contents" role="dialog" aria-label="Guests and preferences">
+            <div class="occupancy-row">
+              <label for="adults-count">Adults</label>
+              <div class="counter-control">
+                <button
+                  type="button"
+                  aria-label="Decrease adults"
+                  [disabled]="adults <= 1"
+                  (click)="decreaseCount('adults')"
+                >
+                  −
+                </button>
+                <output id="adults-count">{{ adults }}</output>
+                <button
+                  type="button"
+                  aria-label="Increase adults"
+                  (click)="increaseCount('adults')"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+            <div class="occupancy-row">
+              <label for="children-count">Children</label>
+              <div class="counter-control">
+                <button
+                  type="button"
+                  aria-label="Decrease children"
+                  [disabled]="children <= 0"
+                  (click)="decreaseCount('children')"
+                >
+                  −
+                </button>
+                <output id="children-count">{{ children }}</output>
+                <button
+                  type="button"
+                  aria-label="Increase children"
+                  (click)="increaseCount('children')"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+            <div class="dropdown-divider"></div>
+            <div class="preference-row">
+              <span>Traveling with pets?</span>
+              <button
+                type="button"
+                class="toggle-switch"
+                role="switch"
+                aria-label="Traveling with pets"
+                [attr.aria-checked]="travelingWithPets"
+                [class.is-active]="travelingWithPets"
+                (click)="travelingWithPets = !travelingWithPets"
+              >
+                <span></span>
+              </button>
+            </div>
+            <button type="button" class="done-button" (click)="closeOccupancyDropdown()">
+              Done
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- Search button -->
+      <button type="submit" class="search-button" [disabled]="isSearching">
+        <img src="search-icon.png" alt="Search icon" />
+        <p style="font-size: 0.85rem; color: white; margin: 0">Search</p>
+      </button>
     </form>
 
     <!-- Filter Dropdown -->
     <div class="filter-container" aria-label="Filter rooms">
-        <select
-            name="room-type"
-            id="room-type"
-            aria-label="Filter by room type"
-            [value]="selectedRoomType"
-            (change)="updateRoomType($event)">
-            <option value="">All room types</option>
-            <option value="Superior King">Superior King</option>
-            <option value="Garden Suite">Garden Suite</option>
-            <option value="River View Double">River View Double</option>
-        </select>
+      <select
+        name="room-type"
+        id="room-type"
+        aria-label="Filter by room type"
+        [value]="selectedRoomType"
+        (change)="updateRoomType($event)"
+      >
+        <option value="">All room types</option>
+        <option value="Superior King">Superior King</option>
+        <option value="Garden Suite">Garden Suite</option>
+        <option value="River View Double">River View Double</option>
+      </select>
 
-        <button
-            type="button"
-            id="available-button"
-            [attr.aria-pressed]="availableOnly"
-            [class.is-selected]="availableOnly"
-            (click)="toggleAvailableOnly()">
-            Available only
-            <span id="available-check" [class.is-visible]="availableOnly" aria-hidden="true">✓</span>
-        </button>
+      <button
+        type="button"
+        id="available-button"
+        [attr.aria-pressed]="availableOnly"
+        [class.is-selected]="availableOnly"
+        (click)="toggleAvailableOnly()"
+      >
+        Available only
+        <span id="available-check" [class.is-visible]="availableOnly" aria-hidden="true">✓</span>
+      </button>
     </div>
 
-    <p *ngIf="searchError" class="booking-error" role="alert">{{ searchError }}</p>
+    @if (searchError) {
+      <p class="booking-error" role="alert">{{ searchError }}</p>
+    }
 
-    <h2 style="color: #252B25;">
-        Rooms at haven
-        <span id="rooms-available-note">
-            {{ filteredRoomResults.length }} rooms shown
-            <ng-container *ngIf="hasSearched">
-                for {{ searchForm.get('check-in')?.value }} → {{ searchForm.get('check-out')?.value }}
-            </ng-container>
-        </span>
+    <h2 style="color: #252b25">
+      Rooms at haven
+      <span id="rooms-available-note">
+        {{ filteredRoomResults.length }} rooms shown
+        @if (hasSearched) {
+          for {{ searchForm.get('check-in')?.value }} → {{ searchForm.get('check-out')?.value }}
+        }
+      </span>
     </h2>
 
-    <p *ngIf="isLoadingRooms" role="status">Loading rooms…</p>
-    <p *ngIf="isSearching" role="status">Searching available rooms…</p>
-    <p *ngIf="!isLoadingRooms && !isSearching && !searchError && roomResults.length === 0" role="status">
-        No rooms are available right now.
-    </p>
-    <p *ngIf="!isLoadingRooms && !isSearching && !searchError && roomResults.length > 0 && filteredRoomResults.length === 0" role="status">
-        No rooms match the selected filters.
-    </p>
+    @if (isLoadingRooms) {
+      <p role="status">Loading rooms…</p>
+    }
+    @if (isSearching) {
+      <p role="status">Searching available rooms…</p>
+    }
+    @if (!isLoadingRooms && !isSearching && !searchError && roomResults.length === 0) {
+      <p role="status">No rooms are available right now.</p>
+    }
+    @if (
+      !isLoadingRooms &&
+      !isSearching &&
+      !searchError &&
+      roomResults.length > 0 &&
+      filteredRoomResults.length === 0
+    ) {
+      <p role="status">No rooms match the selected filters.</p>
+    }
     <div class="rooms-listing">
+      @for (room of filteredRoomResults; track room) {
         <app-room-card
-            *ngFor="let room of filteredRoomResults"
-            [room]="room"
-            [checkIn]="searchForm.get('check-in')?.value || ''"
-            [checkOut]="searchForm.get('check-out')?.value || ''"
-            (viewDetails)="viewRoom($event)">
+          [room]="room"
+          [checkIn]="searchForm.get('check-in')?.value || ''"
+          [checkOut]="searchForm.get('check-out')?.value || ''"
+          (viewDetails)="viewRoom($event)"
+        >
         </app-room-card>
+      }
     </div>
   </div>
 </div>

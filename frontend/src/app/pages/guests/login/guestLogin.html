@@ -1,52 +1,86 @@
 <div class="login-container">
   <header>
-    <img style="width:90px; padding: 10px 0;" src="haven-full-logo.png" alt="Logo">
+    <img style="width: 90px; padding: 10px 0" src="haven-full-logo.png" alt="Logo" />
     <p>Log in to start booking!</p>
   </header>
 
   <div class="main-section">
     <div id="login-container">
-      <p style="font-weight: bold; font-size: 0.70rem; color:#52634B">GUEST ACCOUNT</p>
-      <h1 style="margin: 15px 0;">Welcome back.</h1>
-      <p style="font-size: 0.9rem; color:#74796F;">Sign in to book your next stay at haven.</p>
+      <p style="font-weight: bold; font-size: 0.7rem; color: #52634b">GUEST ACCOUNT</p>
+      <h1 style="margin: 15px 0">Welcome back.</h1>
+      <p style="font-size: 0.9rem; color: #74796f">Sign in to book your next stay at haven.</p>
 
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-        <p *ngIf="errorMessage()" class="form-error" role="alert" aria-live="assertive">
-          {{ errorMessage() }}
-        </p>
+        @if (errorMessage()) {
+          <p class="form-error" role="alert" aria-live="assertive">
+            {{ errorMessage() }}
+          </p>
+        }
 
         <!-- Email -->
         <div class="form-group">
           <label for="email">Email</label>
-          <input type="email" id="email" formControlName="email" placeholder="Enter email" autocomplete="email" (input)="clearError()" [attr.aria-invalid]="loginForm.get('email')?.touched && loginForm.get('email')?.invalid">
-          <small *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.hasError('required')" class="field-error">Email is required.</small>
-          <small *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.hasError('email')" class="field-error">Enter a valid email address.</small>
+          <input
+            type="email"
+            id="email"
+            formControlName="email"
+            placeholder="Enter email"
+            autocomplete="email"
+            (input)="clearError()"
+            [attr.aria-invalid]="loginForm.get('email')?.touched && loginForm.get('email')?.invalid"
+          />
+          @if (loginForm.get('email')?.touched && loginForm.get('email')?.hasError('required')) {
+            <small class="field-error">Email is required.</small>
+          }
+          @if (loginForm.get('email')?.touched && loginForm.get('email')?.hasError('email')) {
+            <small class="field-error">Enter a valid email address.</small>
+          }
           <small class="hint">Enter a valid email address that is not already registered.</small>
         </div>
 
         <!-- Password -->
         <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" id="password" formControlName="password" placeholder="Enter password" autocomplete="current-password" (input)="clearError()" [attr.aria-invalid]="loginForm.get('password')?.touched && loginForm.get('password')?.invalid">
-          <small *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required')" class="field-error">Password is required.</small>
+          <input
+            type="password"
+            id="password"
+            formControlName="password"
+            placeholder="Enter password"
+            autocomplete="current-password"
+            (input)="clearError()"
+            [attr.aria-invalid]="
+              loginForm.get('password')?.touched && loginForm.get('password')?.invalid
+            "
+          />
+          @if (
+            loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required')
+          ) {
+            <small class="field-error">Password is required.</small>
+          }
         </div>
-        
+
         <button type="submit" [disabled]="isSubmitting()">
           {{ isSubmitting() ? 'Signing in…' : 'Sign in' }}
         </button>
       </form>
 
       <div class="login-link">
-        <p style="color:#74796F;">New to haven? <a routerLink="/guestRegister">Create an account</a></p> 
+        <p style="color: #74796f">
+          New to haven? <a routerLink="/guestRegister">Create an account</a>
+        </p>
       </div>
 
       <div id="divider"></div>
 
-      <p id="login-notes">Your guest account gives you access to your bookings and personal details.</p>
+      <p id="login-notes">
+        Your guest account gives you access to your bookings and personal details.
+      </p>
     </div>
 
-    <div class="staff-link" style="margin: 5px;">
-      <p style="color:#74796F;">Working at haven? <a routerLink="/adminLogin">Staff sign in →</a></p>
-    </div>  
+    <div class="staff-link" style="margin: 5px">
+      <p style="color: #74796f">
+        Working at haven? <a routerLink="/adminLogin">Staff sign in →</a>
+      </p>
+    </div>
   </div>
 </div>

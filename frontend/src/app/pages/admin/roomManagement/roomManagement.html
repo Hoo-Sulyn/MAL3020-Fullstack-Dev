@@ -1,270 +1,438 @@
 <div id="room-management-container">
-    <div id="header-container">
-        <div id="header-contents">
-            <h1>Room management</h1>
-            <small>Manage fixed rates, room details and the status of every room at haven.</small>
-            <p id="room-management-summary">
-                <span id="total-rooms">{{ rooms.length }}</span> rooms •
-                <span id="total-available-rooms">{{ availableCount }}</span> available •
-                <span id="total-occupied-rooms">{{ occupiedCount }}</span> occupied •
-                <span id="total-maintenance">{{ maintenanceCount }}</span> maintenance •
-                <span id="today-date">{{ todayLabel }}</span>
-            </p>
-        </div>
-        <div id="header-add-room-btn">
-            <button type="button" id="add-room-btn" (click)="openAddRoom()">+ Add room</button>
-        </div>
+  <div id="header-container">
+    <div id="header-contents">
+      <h1>Room management</h1>
+      <small>Manage fixed rates, room details and the status of every room at haven.</small>
+      <p id="room-management-summary">
+        <span id="total-rooms">{{ rooms.length }}</span> rooms •
+        <span id="total-available-rooms">{{ availableCount }}</span> available •
+        <span id="total-occupied-rooms">{{ occupiedCount }}</span> occupied •
+        <span id="total-maintenance">{{ maintenanceCount }}</span> maintenance •
+        <span id="today-date">{{ todayLabel }}</span>
+      </p>
     </div>
+    <div id="header-add-room-btn">
+      <button type="button" id="add-room-btn" (click)="openAddRoom()">+ Add room</button>
+    </div>
+  </div>
 
-    <div *ngIf="pageError" class="room-page-error" role="alert">{{ pageError }}</div>
+  @if (pageError) {
+    <div class="room-page-error" role="alert">{{ pageError }}</div>
+  }
 
-    <div class="main-container">
-        <div id="room-list-add">
-            <div class="room-card-container" id="room-list-container">
-                <div id="room-list-filter-section">
-                    <form id="search-bar" (submit)="$event.preventDefault()">
-                        <img src="black-search-icon.png" alt="search">
-                        <input
-                            type="search"
-                            id="search-place"
-                            placeholder="Search room number, type or details"
-                            aria-label="Search rooms by number, type or details"
-                            [value]="searchQuery"
-                            (input)="updateSearchQuery($event)">
-                    </form>
-                    <div id="status-filter-dropdown" (click)="$event.stopPropagation()">
-                        <button
-                            type="button"
-                            id="status-filter-button"
-                            [attr.aria-expanded]="statusFilterDropdownOpen"
-                            aria-haspopup="listbox"
-                            aria-label="Filter rooms by status"
-                            (click)="toggleStatusFilterDropdown()">
-                            <span>{{ selectedStatus }}</span>
-                            <span class="filter-chevron" [class.is-open]="statusFilterDropdownOpen" aria-hidden="true"></span>
-                        </button>
-                        <div
-                            *ngIf="statusFilterDropdownOpen"
-                            id="status-filter-options"
-                            role="listbox"
-                            aria-label="Room status">
-                            <button
-                                *ngFor="let status of roomStatusFilters"
-                                type="button"
-                                role="option"
-                                [attr.aria-selected]="selectedStatus === status"
-                                [class.is-selected]="selectedStatus === status"
-                                (click)="selectStatusFilter(status)">
-                                {{ status }}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <table id="room-list-table">
-                    <colgroup>
-                        <col class="room-column">
-                        <col class="type-column">
-                        <col class="details-column">
-                        <col class="capacity-column">
-                        <col class="nightly-column">
-                        <col class="status-column">
-                        <col class="actions-column">
-                    </colgroup>
-                    <thead>
-                        <tr id="room-list-header">
-                            <th>Room</th>
-                            <th>Type</th>
-                            <th>Details</th>
-                            <th>Capacity</th>
-                            <th>Nightly</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let room of filteredRooms" class="room-list-contents">
-                            <td class="room-num">{{ room.number }}</td>
-                            <td>{{ room.type }}</td>
-                            <td>{{ roomDetails(room) }}</td>
-                            <td>{{ room.capacity }}</td>
-                            <td>RM {{ room.nightlyRate | number:'1.2-2' }}</td>
-                            <td>
-                                <p class="room-status-label" [ngClass]="'status-' + room.status.toLowerCase()">
-                                    {{ room.status }}
-                                </p>
-                            </td>
-                            <td class="actions">
-                                <button type="button" class="edit-btn" [disabled]="isSaving" (click)="openEditRoom(room)">Edit</button> •
-                                <button type="button" class="delete-btn" [disabled]="isSaving" (click)="openDeleteRoom(room)">Delete</button>
-                                <div class="table-status-dropdown" (click)="$event.stopPropagation()">
-                                    <button
-                                        type="button"
-                                        class="table-status-button"
-                                        [disabled]="isSaving"
-                                        [attr.aria-expanded]="roomStatusDropdownOpen === room.number"
-                                        aria-haspopup="listbox"
-                                        [attr.aria-label]="'Set status for room ' + room.number"
-                                        (click)="toggleRoomStatusDropdown(room.number)">
-                                        Set status <span aria-hidden="true">▾</span>
-                                    </button>
-                                    <div
-                                        *ngIf="roomStatusDropdownOpen === room.number"
-                                        class="table-status-options"
-                                        role="listbox"
-                                        [attr.aria-label]="'Status for room ' + room.number">
-                                        <button
-                                            *ngFor="let status of statusOptions"
-                                            type="button"
-                                            role="option"
-                                            [attr.aria-selected]="room.statusOverride === status"
-                                            [class.is-selected]="room.statusOverride === status"
-                                            (click)="selectRoomStatus(room, status)">
-                                            {{ status }}
-                                        </button>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr *ngIf="isLoading && rooms.length === 0" class="room-list-contents">
-                            <td colspan="7">Loading rooms…</td>
-                        </tr>
-                        <tr *ngIf="!isLoading && !pageError && rooms.length === 0" class="room-list-contents">
-                            <td colspan="7">No rooms yet. Select “+ Add room” to create the first one.</td>
-                        </tr>
-                        <tr *ngIf="!isLoading && rooms.length > 0 && filteredRooms.length === 0" class="room-list-contents">
-                            <td colspan="7">No rooms match the selected filters.</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="tfoot">
-                    <div id="count-rooms-page">
-                        <small id="count-rooms">{{ filteredRooms.length }} of {{ rooms.length }} rooms</small>
-                    </div>
-                </div>
-            </div>
-
-            <div *ngIf="showAddRoom" class="room-card-container" id="add-room-container">
-                <h3>Add a room</h3>
-                <form id="add-room-form" [formGroup]="addRoomForm" (ngSubmit)="createRoom()">
-                    <div class="form-row">
-                        <div class="form-column">
-                            <label for="form-room-num">Room number</label>
-                            <input type="text" id="form-room-num" formControlName="number" placeholder="Example: 001" required>
-                        </div>
-                        <div class="form-column">
-                            <label for="form-room-type">Room type</label>
-                            <select id="form-room-type" class="form-select" formControlName="type" required>
-                                <option value="" disabled>Select room type</option>
-                                <option *ngFor="let type of roomTypes" [value]="type">{{ type }}</option>
-                            </select>
-                        </div>
-                        <div class="form-column">
-                            <label for="form-room-capacity">Capacity</label>
-                            <input type="number" id="form-room-capacity" formControlName="capacity" min="1" step="1" required>
-                        </div>
-                        <div class="form-column">
-                            <label for="form-room-price-rate">Fixed rate • MYR/night</label>
-                            <input type="number" id="form-room-price-rate" formControlName="nightlyRate" min="0" step="0.01" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-column">
-                            <label for="form-room-floor">Floor number</label>
-                            <input type="number" id="form-room-floor" formControlName="floor" min="0" step="1" required>
-                        </div>
-                        <div class="form-column">
-                            <label for="form-room-desc">Description & specifications</label>
-                            <input type="text" id="form-room-desc" formControlName="description" placeholder="Example: City view · King bed" maxlength="500" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-column">
-                            <label for="form-room-status">Initial status</label>
-                            <select id="form-room-status" class="form-select" formControlName="status">
-                                <option *ngFor="let status of statusOptions" [value]="status">{{ status }}</option>
-                            </select>
-                        </div>
-                        <div class="form-column">
-                            <label for="form-room-amenities">Amenities</label>
-                            <input type="text" id="form-room-amenities" formControlName="amenities" placeholder="Example: Wi-Fi · Breakfast included" maxlength="500" required>
-                        </div>
-                    </div>
-                    <p *ngIf="addError" class="form-error" role="alert">{{ addError }}</p>
-                    <div class="form-row" id="form-btn-container">
-                        <button type="submit" class="submit-btn" [disabled]="isSaving">{{ isSaving ? 'Creating…' : 'Create room' }}</button>
-                        <button type="button" class="cancel-btn" [disabled]="isSaving" (click)="closeAddRoom()">Cancel</button>
-                    </div>
-                </form>
-            </div>
+  <div class="main-container">
+    <div id="room-list-add">
+      <div class="room-card-container" id="room-list-container">
+        <div id="room-list-filter-section">
+          <form id="search-bar" (submit)="$event.preventDefault()">
+            <img src="black-search-icon.png" alt="search" />
+            <input
+              type="search"
+              id="search-place"
+              placeholder="Search room number, type or details"
+              aria-label="Search rooms by number, type or details"
+              [value]="searchQuery"
+              (input)="updateSearchQuery($event)"
+            />
+          </form>
+          <div id="status-filter-dropdown" (click)="$event.stopPropagation()">
+            <button
+              type="button"
+              id="status-filter-button"
+              [attr.aria-expanded]="statusFilterDropdownOpen"
+              aria-haspopup="listbox"
+              aria-label="Filter rooms by status"
+              (click)="toggleStatusFilterDropdown()"
+            >
+              <span>{{ selectedStatus }}</span>
+              <span
+                class="filter-chevron"
+                [class.is-open]="statusFilterDropdownOpen"
+                aria-hidden="true"
+              ></span>
+            </button>
+            @if (statusFilterDropdownOpen) {
+              <div id="status-filter-options" role="listbox" aria-label="Room status">
+                @for (status of roomStatusFilters; track status) {
+                  <button
+                    type="button"
+                    role="option"
+                    [attr.aria-selected]="selectedStatus === status"
+                    [class.is-selected]="selectedStatus === status"
+                    (click)="selectStatusFilter(status)"
+                  >
+                    {{ status }}
+                  </button>
+                }
+              </div>
+            }
+          </div>
         </div>
 
-        <div *ngIf="editingRoom || deletingRoom" id="room-edit-delete">
-            <div *ngIf="editingRoom && !deletingRoom" class="room-card-container" id="edit-room-container">
-                <small id="highlighted-note">Selected room • {{ editingRoom.number }}</small>
-                <h3>Edit room</h3>
-                <form id="edit-room-form" [formGroup]="editRoomForm" (ngSubmit)="saveRoomChanges()">
-                    <div class="form-row">
-                        <div class="form-column">
-                            <label for="edit-room-number">Room number</label>
-                            <input type="text" id="edit-room-number" formControlName="number" placeholder="Example: 001" required>
-                        </div>
-                        <div class="form-column">
-                            <label for="edit-room-floor">Floor number</label>
-                            <input type="number" id="edit-room-floor" formControlName="floor" min="0" step="1" required>
-                        </div>
-                    </div>
-                    <div class="form-column">
-                        <label for="edit-room-type">Room type</label>
-                        <select id="edit-room-type" class="form-select" formControlName="type" required>
-                            <option value="" disabled>Select room type</option>
-                            <option *ngFor="let type of roomTypes" [value]="type">{{ type }}</option>
-                        </select>
-                    </div>
-                    <div class="form-column">
-                        <label for="edit-room-desc">Description & specifications</label>
-                        <input type="text" id="edit-room-desc" formControlName="description" maxlength="500" required>
-                    </div>
-                    <div class="form-column">
-                        <label for="edit-room-amenities">Amenities</label>
-                        <input type="text" id="edit-room-amenities" formControlName="amenities" maxlength="500" required>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-column">
-                            <label for="edit-room-capacity">Capacity</label>
-                            <input type="number" id="edit-room-capacity" formControlName="capacity" min="1" step="1" required>
-                        </div>
-                        <div class="form-column">
-                            <label for="edit-room-price-rate">Fixed rate • MYR/night</label>
-                            <input type="number" id="edit-room-price-rate" formControlName="nightlyRate" min="0" step="0.01" required>
-                        </div>
-                    </div>
-                    <div class="form-column">
-                        <label for="edit-room-status">Status</label>
-                        <select id="edit-room-status" class="form-select" formControlName="status">
-                            <option *ngFor="let status of statusOptions" [value]="status">{{ status }}</option>
-                        </select>
-                    </div>
-                    <p *ngIf="editError" class="form-error" role="alert">{{ editError }}</p>
-                    <div class="form-row" id="edit-btn-container">
-                        <button type="submit" class="submit-btn" [disabled]="isSaving">{{ isSaving ? 'Saving…' : 'Save changes' }}</button>
-                        <button type="button" class="cancel-btn" [disabled]="isSaving" (click)="closeEditRoom()">Cancel</button>
-                    </div>
-                </form>
-            </div>
-
-            <div *ngIf="deletingRoom" class="room-card-container" id="delete-room-container">
-                <small id="delete-highlighted-note">Delete confirmation</small>
-                <h3>Delete room {{ deletingRoom.number }}?</h3>
-                <p>This room will be removed from the inventory. This action cannot be undone.</p>
-                <p *ngIf="deleteError" class="form-error" role="alert">{{ deleteError }}</p>
-                <div class="form-row" id="delete-btn-container">
-                    <button type="button" class="cancel-btn" [disabled]="isSaving" (click)="closeDeleteRoom()">Cancel</button>
-                    <button type="button" class="submit-btn" id="delete-room-btn" [disabled]="isSaving" (click)="confirmDeleteRoom()">
-                        {{ isSaving ? 'Deleting…' : 'Delete room' }}
+        <table id="room-list-table">
+          <colgroup>
+            <col class="room-column" />
+            <col class="type-column" />
+            <col class="details-column" />
+            <col class="capacity-column" />
+            <col class="nightly-column" />
+            <col class="status-column" />
+            <col class="actions-column" />
+          </colgroup>
+          <thead>
+            <tr id="room-list-header">
+              <th>Room</th>
+              <th>Type</th>
+              <th>Details</th>
+              <th>Capacity</th>
+              <th>Nightly</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (room of filteredRooms; track room) {
+              <tr class="room-list-contents">
+                <td class="room-num">{{ room.number }}</td>
+                <td>{{ room.type }}</td>
+                <td>{{ roomDetails(room) }}</td>
+                <td>{{ room.capacity }}</td>
+                <td>RM {{ room.nightlyRate | number: '1.2-2' }}</td>
+                <td>
+                  <p class="room-status-label" [ngClass]="'status-' + room.status.toLowerCase()">
+                    {{ room.status }}
+                  </p>
+                </td>
+                <td class="actions">
+                  <button
+                    type="button"
+                    class="edit-btn"
+                    [disabled]="isSaving"
+                    (click)="openEditRoom(room)"
+                  >
+                    Edit
+                  </button>
+                  •
+                  <button
+                    type="button"
+                    class="delete-btn"
+                    [disabled]="isSaving"
+                    (click)="openDeleteRoom(room)"
+                  >
+                    Delete
+                  </button>
+                  <div class="table-status-dropdown" (click)="$event.stopPropagation()">
+                    <button
+                      type="button"
+                      class="table-status-button"
+                      [disabled]="isSaving"
+                      [attr.aria-expanded]="roomStatusDropdownOpen === room.number"
+                      aria-haspopup="listbox"
+                      [attr.aria-label]="'Set status for room ' + room.number"
+                      (click)="toggleRoomStatusDropdown(room.number)"
+                    >
+                      Set status <span aria-hidden="true">▾</span>
                     </button>
-                </div>
-            </div>
+                    @if (roomStatusDropdownOpen === room.number) {
+                      <div
+                        class="table-status-options"
+                        role="listbox"
+                        [attr.aria-label]="'Status for room ' + room.number"
+                      >
+                        @for (status of statusOptions; track status) {
+                          <button
+                            type="button"
+                            role="option"
+                            [attr.aria-selected]="room.statusOverride === status"
+                            [class.is-selected]="room.statusOverride === status"
+                            (click)="selectRoomStatus(room, status)"
+                          >
+                            {{ status }}
+                          </button>
+                        }
+                      </div>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+            @if (isLoading && rooms.length === 0) {
+              <tr class="room-list-contents">
+                <td colspan="7">Loading rooms…</td>
+              </tr>
+            }
+            @if (!isLoading && !pageError && rooms.length === 0) {
+              <tr class="room-list-contents">
+                <td colspan="7">No rooms yet. Select “+ Add room” to create the first one.</td>
+              </tr>
+            }
+            @if (!isLoading && rooms.length > 0 && filteredRooms.length === 0) {
+              <tr class="room-list-contents">
+                <td colspan="7">No rooms match the selected filters.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <div class="tfoot">
+          <div id="count-rooms-page">
+            <small id="count-rooms">{{ filteredRooms.length }} of {{ rooms.length }} rooms</small>
+          </div>
         </div>
+      </div>
+
+      @if (showAddRoom) {
+        <div class="room-card-container" id="add-room-container">
+          <h3>Add a room</h3>
+          <form id="add-room-form" [formGroup]="addRoomForm" (ngSubmit)="createRoom()">
+            <div class="form-row">
+              <div class="form-column">
+                <label for="form-room-num">Room number</label>
+                <input
+                  type="text"
+                  id="form-room-num"
+                  formControlName="number"
+                  placeholder="Example: 001"
+                  required
+                />
+              </div>
+              <div class="form-column">
+                <label for="form-room-type">Room type</label>
+                <select id="form-room-type" class="form-select" formControlName="type" required>
+                  <option value="" disabled>Select room type</option>
+                  @for (type of roomTypes; track type) {
+                    <option [value]="type">{{ type }}</option>
+                  }
+                </select>
+              </div>
+              <div class="form-column">
+                <label for="form-room-capacity">Capacity</label>
+                <input
+                  type="number"
+                  id="form-room-capacity"
+                  formControlName="capacity"
+                  min="1"
+                  step="1"
+                  required
+                />
+              </div>
+              <div class="form-column">
+                <label for="form-room-price-rate">Fixed rate • MYR/night</label>
+                <input
+                  type="number"
+                  id="form-room-price-rate"
+                  formControlName="nightlyRate"
+                  min="0"
+                  step="0.01"
+                  required
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-column">
+                <label for="form-room-floor">Floor number</label>
+                <input
+                  type="number"
+                  id="form-room-floor"
+                  formControlName="floor"
+                  min="0"
+                  step="1"
+                  required
+                />
+              </div>
+              <div class="form-column">
+                <label for="form-room-desc">Description & specifications</label>
+                <input
+                  type="text"
+                  id="form-room-desc"
+                  formControlName="description"
+                  placeholder="Example: City view · King bed"
+                  maxlength="500"
+                  required
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-column">
+                <label for="form-room-status">Initial status</label>
+                <select id="form-room-status" class="form-select" formControlName="status">
+                  @for (status of statusOptions; track status) {
+                    <option [value]="status">{{ status }}</option>
+                  }
+                </select>
+              </div>
+              <div class="form-column">
+                <label for="form-room-amenities">Amenities</label>
+                <input
+                  type="text"
+                  id="form-room-amenities"
+                  formControlName="amenities"
+                  placeholder="Example: Wi-Fi · Breakfast included"
+                  maxlength="500"
+                  required
+                />
+              </div>
+            </div>
+            @if (addError) {
+              <p class="form-error" role="alert">{{ addError }}</p>
+            }
+            <div class="form-row" id="form-btn-container">
+              <button type="submit" class="submit-btn" [disabled]="isSaving">
+                {{ isSaving ? 'Creating…' : 'Create room' }}
+              </button>
+              <button
+                type="button"
+                class="cancel-btn"
+                [disabled]="isSaving"
+                (click)="closeAddRoom()"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      }
     </div>
+
+    @if (editingRoom || deletingRoom) {
+      <div id="room-edit-delete">
+        @if (editingRoom && !deletingRoom) {
+          <div class="room-card-container" id="edit-room-container">
+            <small id="highlighted-note">Selected room • {{ editingRoom.number }}</small>
+            <h3>Edit room</h3>
+            <form id="edit-room-form" [formGroup]="editRoomForm" (ngSubmit)="saveRoomChanges()">
+              <div class="form-row">
+                <div class="form-column">
+                  <label for="edit-room-number">Room number</label>
+                  <input
+                    type="text"
+                    id="edit-room-number"
+                    formControlName="number"
+                    placeholder="Example: 001"
+                    required
+                  />
+                </div>
+                <div class="form-column">
+                  <label for="edit-room-floor">Floor number</label>
+                  <input
+                    type="number"
+                    id="edit-room-floor"
+                    formControlName="floor"
+                    min="0"
+                    step="1"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="form-column">
+                <label for="edit-room-type">Room type</label>
+                <select id="edit-room-type" class="form-select" formControlName="type" required>
+                  <option value="" disabled>Select room type</option>
+                  @for (type of roomTypes; track type) {
+                    <option [value]="type">{{ type }}</option>
+                  }
+                </select>
+              </div>
+              <div class="form-column">
+                <label for="edit-room-desc">Description & specifications</label>
+                <input
+                  type="text"
+                  id="edit-room-desc"
+                  formControlName="description"
+                  maxlength="500"
+                  required
+                />
+              </div>
+              <div class="form-column">
+                <label for="edit-room-amenities">Amenities</label>
+                <input
+                  type="text"
+                  id="edit-room-amenities"
+                  formControlName="amenities"
+                  maxlength="500"
+                  required
+                />
+              </div>
+              <div class="form-row">
+                <div class="form-column">
+                  <label for="edit-room-capacity">Capacity</label>
+                  <input
+                    type="number"
+                    id="edit-room-capacity"
+                    formControlName="capacity"
+                    min="1"
+                    step="1"
+                    required
+                  />
+                </div>
+                <div class="form-column">
+                  <label for="edit-room-price-rate">Fixed rate • MYR/night</label>
+                  <input
+                    type="number"
+                    id="edit-room-price-rate"
+                    formControlName="nightlyRate"
+                    min="0"
+                    step="0.01"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="form-column">
+                <label for="edit-room-status">Status</label>
+                <select id="edit-room-status" class="form-select" formControlName="status">
+                  @for (status of statusOptions; track status) {
+                    <option [value]="status">{{ status }}</option>
+                  }
+                </select>
+              </div>
+              @if (editError) {
+                <p class="form-error" role="alert">{{ editError }}</p>
+              }
+              <div class="form-row" id="edit-btn-container">
+                <button type="submit" class="submit-btn" [disabled]="isSaving">
+                  {{ isSaving ? 'Saving…' : 'Save changes' }}
+                </button>
+                <button
+                  type="button"
+                  class="cancel-btn"
+                  [disabled]="isSaving"
+                  (click)="closeEditRoom()"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        }
+        @if (deletingRoom) {
+          <div class="room-card-container" id="delete-room-container">
+            <small id="delete-highlighted-note">Delete confirmation</small>
+            <h3>Delete room {{ deletingRoom.number }}?</h3>
+            <p>This room will be removed from the inventory. This action cannot be undone.</p>
+            @if (deleteError) {
+              <p class="form-error" role="alert">{{ deleteError }}</p>
+            }
+            <div class="form-row" id="delete-btn-container">
+              <button
+                type="button"
+                class="cancel-btn"
+                [disabled]="isSaving"
+                (click)="closeDeleteRoom()"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                class="submit-btn"
+                id="delete-room-btn"
+                [disabled]="isSaving"
+                (click)="confirmDeleteRoom()"
+              >
+                {{ isSaving ? 'Deleting…' : 'Delete room' }}
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
 </div>
