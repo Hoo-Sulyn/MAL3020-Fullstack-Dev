@@ -35,7 +35,7 @@
               (input)="updateSearchQuery($event)"
             />
           </form>
-          <div id="status-filter-dropdown" (click)="$event.stopPropagation()">
+          <div id="status-filter-dropdown" role="presentation" (click)="$event.stopPropagation()">
             <button
               type="button"
               id="status-filter-button"
@@ -121,7 +121,7 @@
                   >
                     Delete
                   </button>
-                  <div class="table-status-dropdown" (click)="$event.stopPropagation()">
+                  <div class="table-status-dropdown" role="presentation" (click)="$event.stopPropagation()">
                     <button
                       type="button"
                       class="table-status-button"
