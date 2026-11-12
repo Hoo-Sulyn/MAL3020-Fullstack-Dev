@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { RouterLink, RouterOutlet, Router } from '@angular/router';
 import { GuestHeader } from './components/guestHeader/guestHeader';
 import { GuestFooter } from './components/guestFooter/guestFooter';
@@ -12,23 +12,41 @@ import { AdminFooter } from './components/adminFooter/adminFooter';
   templateUrl: './app.html',
 })
 export class App {
-  protected readonly title = signal('frontend');
+  protected router = inject(Router);
 
-  constructor(protected router: Router) {}
+  protected readonly title = signal('frontend');
 
   private get currentPath(): string {
     return this.router.url.split('?')[0];
   }
 
   get showAdminLayout(): boolean {
-    return !['/', '/guestRegister', '/hotelBooking', '/roomDetails', '/confirmBooking', '/history', '/profile', '/adminLogin'].includes(this.currentPath);
+    return ![
+      '/',
+      '/guestRegister',
+      '/hotelBooking',
+      '/roomDetails',
+      '/confirmBooking',
+      '/history',
+      '/profile',
+      '/adminLogin',
+    ].includes(this.currentPath);
   }
 
   get showGuestHeader(): boolean {
-    return !['/', '/guestRegister', '/adminLogin', '/dashboard', '/roomManagement', '/bookingManagement'].includes(this.currentPath);
+    return ![
+      '/',
+      '/guestRegister',
+      '/adminLogin',
+      '/dashboard',
+      '/roomManagement',
+      '/bookingManagement',
+    ].includes(this.currentPath);
   }
 
   get showGuestFooter(): boolean {
-    return !['/adminLogin', '/dashboard', '/roomManagement', '/bookingManagement'].includes(this.currentPath);
+    return !['/adminLogin', '/dashboard', '/roomManagement', '/bookingManagement'].includes(
+      this.currentPath,
+    );
   }
 }

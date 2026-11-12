@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { RealtimeService } from './realtime.service';
 
@@ -54,12 +54,10 @@ export interface Booking {
 
 @Injectable({ providedIn: 'root' })
 export class RoomService {
-  private readonly apiUrl = 'http://localhost:3000/api';
+  private readonly http = inject(HttpClient);
+  private readonly realtime = inject(RealtimeService);
 
-  constructor(
-    private readonly http: HttpClient,
-    private readonly realtime: RealtimeService
-  ) {}
+  private readonly apiUrl = 'http://localhost:3000/api';
 
   getRooms(checkIn?: string, checkOut?: string, adults = 1): Observable<Room[]> {
     let params = new HttpParams();
@@ -91,7 +89,7 @@ export class RoomService {
     return this.http.patch<Room>(
       `${this.apiUrl}/rooms/${encodeURIComponent(id)}/status`,
       { status },
-      { headers: this.authHeaders() }
+      { headers: this.authHeaders() },
     );
   }
 
@@ -114,18 +112,19 @@ export class RoomService {
     });
   }
 
-  updateGuestBooking(id: string, booking: {
-    checkIn: string;
-    checkOut: string;
-    adults: number;
-    children: number;
-    travelingWithPets: boolean;
-  }): Observable<Booking> {
-    return this.http.put<Booking>(
-      `${this.apiUrl}/bookings/${encodeURIComponent(id)}`,
-      booking,
-      { headers: this.authHeaders() }
-    );
+  updateGuestBooking(
+    id: string,
+    booking: {
+      checkIn: string;
+      checkOut: string;
+      adults: number;
+      children: number;
+      travelingWithPets: boolean;
+    },
+  ): Observable<Booking> {
+    return this.http.put<Booking>(`${this.apiUrl}/bookings/${encodeURIComponent(id)}`, booking, {
+      headers: this.authHeaders(),
+    });
   }
 
   getMyBookings(): Observable<Booking[]> {
@@ -144,25 +143,23 @@ export class RoomService {
     return this.http.patch<Booking>(
       `${this.apiUrl}/bookings/${encodeURIComponent(id)}/cancel`,
       {},
-      { headers: this.authHeaders() }
+      { headers: this.authHeaders() },
     );
   }
 
   updateBookingStatus(
     id: string,
-    status: 'Checked in' | 'Checked out' | 'Cancelled'
+    status: 'Checked in' | 'Checked out' | 'Cancelled',
   ): Observable<Booking> {
     return this.http.patch<Booking>(
       `${this.apiUrl}/bookings/${encodeURIComponent(id)}/status`,
       { status },
-      { headers: this.authHeaders() }
+      { headers: this.authHeaders() },
     );
   }
 
   private authHeaders(): HttpHeaders {
     const token = this.realtime.getToken();
-    return token
-      ? new HttpHeaders({ Authorization: `Bearer ${token}` })
-      : new HttpHeaders();
+    return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
   }
 }

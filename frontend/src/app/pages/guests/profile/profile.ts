@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 
 import {
   AbstractControl,
@@ -27,6 +27,12 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
   styleUrl: './profile.css',
 })
 export class Profile implements OnInit {
+  private readonly fb = inject(FormBuilder);
+  private readonly auth = inject(AuthService);
+  private readonly realtime = inject(RealtimeService);
+  private readonly router = inject(Router);
+  private readonly changeDetector = inject(ChangeDetectorRef);
+
   readonly profileForm: FormGroup;
   readonly passwordForm: FormGroup;
   user: AuthUser | null = null;
@@ -38,13 +44,7 @@ export class Profile implements OnInit {
   errorMessage = '';
   successMessage = '';
 
-  constructor(
-    private readonly fb: FormBuilder,
-    private readonly auth: AuthService,
-    private readonly realtime: RealtimeService,
-    private readonly router: Router,
-    private readonly changeDetector: ChangeDetectorRef,
-  ) {
+  constructor() {
     this.profileForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
       lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],

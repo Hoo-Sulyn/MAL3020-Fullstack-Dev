@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -13,18 +13,18 @@ import { RealtimeService } from '../../../services/realtime.service';
   styleUrl: './guestLogin.css',
 })
 export class GuestLogin {
+  private fb = inject(FormBuilder);
+  private auth = inject(AuthService);
+  private realtime = inject(RealtimeService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+
   loginForm: FormGroup;
   errorMessage = signal('');
   showRegisterPrompt = signal(false);
   isSubmitting = signal(false);
 
-  constructor(
-    private fb: FormBuilder,
-    private auth: AuthService,
-    private realtime: RealtimeService,
-    private router: Router,
-    private route: ActivatedRoute,
-  ) {
+  constructor() {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],

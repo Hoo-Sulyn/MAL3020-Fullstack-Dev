@@ -1,8 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Room, RoomPayload, RoomService, RoomStatus, RoomStatusOverride } from '../../../services/room.service';
+import {
+  Room,
+  RoomPayload,
+  RoomService,
+  RoomStatus,
+  RoomStatusOverride,
+} from '../../../services/room.service';
 import { getHotelDateValue } from '../../../services/date.utils';
 
 const ROOM_TYPES = ['Superior King', 'Garden Suite', 'River View Double'];
@@ -17,6 +23,10 @@ const STATUS_OPTIONS: RoomStatusOverride[] = ['Automatic', ...ROOM_STATUSES];
   styleUrl: './roomManagement.css',
 })
 export class RoomManagement implements OnInit {
+  private readonly fb = inject(FormBuilder);
+  private readonly roomService = inject(RoomService);
+  private readonly changeDetector = inject(ChangeDetectorRef);
+
   readonly roomTypes = ROOM_TYPES;
   readonly roomStatuses = ROOM_STATUSES;
   readonly statusOptions = STATUS_OPTIONS;
@@ -44,11 +54,7 @@ export class RoomManagement implements OnInit {
   addRoomForm: FormGroup;
   editRoomForm: FormGroup;
 
-  constructor(
-    private readonly fb: FormBuilder,
-    private readonly roomService: RoomService,
-    private readonly changeDetector: ChangeDetectorRef
-  ) {
+  constructor() {
     this.addRoomForm = this.createRoomForm();
     this.editRoomForm = this.createRoomForm();
   }
@@ -60,12 +66,13 @@ export class RoomManagement implements OnInit {
   get filteredRooms(): Room[] {
     const query = this.searchQuery.trim().toLowerCase();
     return this.rooms.filter((room) => {
-      const matchesSearch = !query
-        || room.number.toLowerCase().includes(query)
-        || room.type.toLowerCase().includes(query)
-        || this.roomDetails(room).toLowerCase().includes(query);
-      const matchesStatus = this.selectedStatus === 'All statuses'
-        || room.status === this.selectedStatus;
+      const matchesSearch =
+        !query ||
+        room.number.toLowerCase().includes(query) ||
+        room.type.toLowerCase().includes(query) ||
+        this.roomDetails(room).toLowerCase().includes(query);
+      const matchesStatus =
+        this.selectedStatus === 'All statuses' || room.status === this.selectedStatus;
       return matchesSearch && matchesStatus;
     });
   }
@@ -180,19 +187,21 @@ export class RoomManagement implements OnInit {
     }
     this.isSaving = true;
     this.editError = '';
-    this.roomService.updateRoom(this.editingRoom.id, this.formPayload(this.editRoomForm)).subscribe({
-      next: (room) => {
-        this.replaceRoom(room);
-        this.closeEditRoom();
-        this.isSaving = false;
-        this.changeDetector.markForCheck();
-      },
-      error: (error: unknown) => {
-        this.editError = this.errorMessage(error, 'Unable to save room changes.');
-        this.isSaving = false;
-        this.changeDetector.markForCheck();
-      },
-    });
+    this.roomService
+      .updateRoom(this.editingRoom.id, this.formPayload(this.editRoomForm))
+      .subscribe({
+        next: (room) => {
+          this.replaceRoom(room);
+          this.closeEditRoom();
+          this.isSaving = false;
+          this.changeDetector.markForCheck();
+        },
+        error: (error: unknown) => {
+          this.editError = this.errorMessage(error, 'Unable to save room changes.');
+          this.isSaving = false;
+          this.changeDetector.markForCheck();
+        },
+      });
   }
 
   openDeleteRoom(room: Room): void {
@@ -294,7 +303,7 @@ export class RoomManagement implements OnInit {
   }
 
   private replaceRoom(updatedRoom: Room): void {
-    this.rooms = this.rooms.map((room) => room.id === updatedRoom.id ? updatedRoom : room);
+    this.rooms = this.rooms.map((room) => (room.id === updatedRoom.id ? updatedRoom : room));
   }
 
   private errorMessage(error: unknown, fallback: string): string {

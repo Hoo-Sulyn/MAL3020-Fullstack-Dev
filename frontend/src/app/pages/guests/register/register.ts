@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 
 import { ChangeDetectorRef } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -30,17 +30,17 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
   styleUrl: './register.css',
 })
 export class GuestRegister {
+  private fb = inject(FormBuilder);
+  private auth = inject(AuthService);
+  private router = inject(Router);
+  private readonly changeDetector = inject(ChangeDetectorRef);
+
   registerForm: FormGroup;
   errorMessage = '';
   successMessage = '';
   isSubmitting = false;
 
-  constructor(
-    private fb: FormBuilder,
-    private auth: AuthService,
-    private router: Router,
-    private readonly changeDetector: ChangeDetectorRef,
-  ) {
+  constructor() {
     this.registerForm = this.fb.group(
       {
         firstName: ['', [Validators.required, Validators.minLength(2)]],

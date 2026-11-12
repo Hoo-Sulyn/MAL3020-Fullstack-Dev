@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, OnInit, inject } from '@angular/core';
 
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -20,6 +20,11 @@ import { RoomCardComponent } from '../../../components/room-card/room-card';
   styleUrl: './hotel-booking.css',
 })
 export class HotelBooking implements OnInit {
+  private fb = inject(FormBuilder);
+  private router = inject(Router);
+  private roomService = inject(RoomService);
+  private changeDetector = inject(ChangeDetectorRef);
+
   readonly today = getHotelDateValue();
   searchForm: FormGroup;
   occupancyDropdownOpen = false;
@@ -34,12 +39,7 @@ export class HotelBooking implements OnInit {
   isLoadingRooms = true;
   searchError = '';
 
-  constructor(
-    private fb: FormBuilder,
-    private router: Router,
-    private roomService: RoomService,
-    private changeDetector: ChangeDetectorRef,
-  ) {
+  constructor() {
     this.searchForm = this.fb.group(
       {
         'check-in': ['', Validators.required],

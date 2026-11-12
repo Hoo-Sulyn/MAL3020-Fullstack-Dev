@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { RealtimeService } from './realtime.service';
 
@@ -26,14 +26,12 @@ interface RegisterResponse {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private readonly http = inject(HttpClient);
+  private readonly realtime = inject(RealtimeService);
+
   private readonly apiUrl = 'http://localhost:3000/api/auth';
   private readonly profileUrl = 'http://localhost:3000/api/profile';
   private readonly sessionKey = 'haven_session';
-
-  constructor(
-    private readonly http: HttpClient,
-    private readonly realtime: RealtimeService
-  ) {}
 
   register(payload: {
     firstName: string;
@@ -57,7 +55,9 @@ export class AuthService {
     });
   }
 
-  updateProfile(profile: Pick<AuthUser, 'firstName' | 'lastName' | 'email' | 'phone'>): Observable<AuthUser> {
+  updateProfile(
+    profile: Pick<AuthUser, 'firstName' | 'lastName' | 'email' | 'phone'>,
+  ): Observable<AuthUser> {
     return this.http.put<AuthUser>(this.profileUrl, profile, {
       headers: this.authHeaders(),
     });
@@ -67,7 +67,7 @@ export class AuthService {
     return this.http.put<void>(
       `${this.profileUrl}/password`,
       { currentPassword, newPassword },
-      { headers: this.authHeaders() }
+      { headers: this.authHeaders() },
     );
   }
 
