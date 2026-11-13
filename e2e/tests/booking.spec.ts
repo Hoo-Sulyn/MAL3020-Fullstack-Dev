@@ -30,6 +30,7 @@ test.describe('Booking journey (whole system)', () => {
   test('a booked room is no longer offered for the same dates', async ({ page, request, browser }) => {
     const token = await adminToken(request);
     const roomNumber = await createRoom(request, token);
+    const spareRoomNumber = await createRoom(request, token); // stays free, so the results are never empty
     const firstGuest = await registerGuestViaApi(request);
     const secondGuest = await registerGuestViaApi(request);
     const checkIn = futureDate(40);
@@ -46,7 +47,9 @@ test.describe('Booking journey (whole system)', () => {
     await otherPage.getByLabel('Check-out').fill(checkOut);
     await otherPage.locator('.search-button').click();
 
-    await expect(otherPage.locator('app-room-card').first()).toBeVisible();
+    await expect(
+      otherPage.locator('app-room-card').filter({ hasText: `Room ${spareRoomNumber}` })
+    ).toBeVisible();
     await expect(
       otherPage.locator('app-room-card').filter({ hasText: `Room ${roomNumber}` })
     ).toHaveCount(0);

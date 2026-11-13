@@ -4,6 +4,7 @@ import { defineConfig, devices } from '@playwright/test';
 // Start it first with `docker compose up -d` and seed the admin account.
 export default defineConfig({
   testDir: './tests',
+  globalTeardown: './global-teardown.ts',
   timeout: 30_000,
   expect: { timeout: 10_000 },
   fullyParallel: true,

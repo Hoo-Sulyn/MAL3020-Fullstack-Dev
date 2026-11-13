@@ -15,10 +15,17 @@ export interface GuestAccount {
 
 let counter = 0;
 
-/** A short value that is different on every call, so tests never collide. */
+/**
+ * A short value that is different on every call, even across parallel workers.
+ * Playwright runs test files in separate processes, and each process has its own counter,
+ * so the time and counter alone can match. The random part stops that.
+ * The result has a fixed width, so one value is never the start of another
+ * (a search for "Room E2E...1" must not also match "Room E2E...10").
+ */
 export function unique(prefix: string): string {
   counter++;
-  return `${prefix}${Date.now().toString(36)}${counter}`;
+  const random = (Math.random().toString(36) + '0000').slice(2, 6);
+  return `${prefix}${Date.now().toString(36)}${random}${String(counter).padStart(3, '0')}`;
 }
 
 /** A date (YYYY-MM-DD) a number of days from today. Far-future dates avoid timezone edge cases. */
