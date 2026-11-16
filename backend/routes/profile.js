@@ -146,8 +146,10 @@ router.delete('/account', async (req, res, next) => {
     }
     const upcomingBooking = await Booking.exists({
       guestId: user._id,
-      status: 'Confirmed',
-      checkOut: { $gt: getHotelDateValue() },
+      $or: [
+        { status: 'Checked in' },
+        { status: 'Confirmed', checkOut: { $gt: getHotelDateValue() } },
+      ],
     });
     if (upcomingBooking) {
       return res.status(409).json({ message: 'Cancel your bookings first.' });
