@@ -74,6 +74,8 @@ npm ci
 npm test
 ```
 
+Integration tests also verify that rooms with active or future bookings cannot be deleted, and that accounts with upcoming confirmed bookings cannot be deleted while past bookings remain in history.
+
 Frontend tests:
 
 ```bash

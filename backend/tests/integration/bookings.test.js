@@ -527,6 +527,73 @@ test('supports admin room create, read, update, status change, and delete', asyn
   assert.equal((await request(`/api/rooms/${createdRoom.id}`)).status, 404);
 });
 
+test('refuses to delete rooms with active or future bookings and retains their history', async (context) => {
+  if (!testMongoUri) {
+    context.skip('A local test MongoDB is required.');
+    return;
+  }
+
+  const room = await createRoom();
+  const adminToken = tokenFor(admin);
+  const futureBookingResponse = await submitBooking(
+    firstGuest,
+    room,
+    dateOffset(10),
+    dateOffset(12)
+  );
+  assert.equal(futureBookingResponse.status, 201);
+  const futureBooking = await futureBookingResponse.json();
+
+  const futureDeleteResponse = await request(`/api/rooms/${room.id}`, {
+    method: 'DELETE',
+    token: adminToken,
+  });
+  assert.equal(futureDeleteResponse.status, 409);
+  assert.deepEqual(await futureDeleteResponse.json(), {
+    message: 'Cancel or complete its bookings first.',
+  });
+  assert.ok(await Room.exists({ _id: room._id }));
+
+  const cancelResponse = await request(`/api/bookings/${futureBooking.id}/cancel`, {
+    method: 'PATCH',
+    token: tokenFor(firstGuest),
+  });
+  assert.equal(cancelResponse.status, 200);
+
+  const currentBookingResponse = await submitBooking(
+    firstGuest,
+    room,
+    getHotelDateValue(),
+    dateOffset(1)
+  );
+  assert.equal(currentBookingResponse.status, 201);
+  const currentBooking = await currentBookingResponse.json();
+  const checkInResponse = await request(`/api/bookings/${currentBooking.id}/status`, {
+    method: 'PATCH',
+    token: adminToken,
+    body: { status: 'Checked in' },
+  });
+  assert.equal(checkInResponse.status, 200);
+
+  const activeDeleteResponse = await request(`/api/rooms/${room.id}`, {
+    method: 'DELETE',
+    token: adminToken,
+  });
+  assert.equal(activeDeleteResponse.status, 409);
+
+  const checkOutResponse = await request(`/api/bookings/${currentBooking.id}/status`, {
+    method: 'PATCH',
+    token: adminToken,
+    body: { status: 'Checked out' },
+  });
+  assert.equal(checkOutResponse.status, 200);
+  assert.equal((await request(`/api/rooms/${room.id}`, {
+    method: 'DELETE',
+    token: adminToken,
+  })).status, 204);
+  assert.equal(await Booking.countDocuments({ roomId: room._id }), 2);
+});
+
 test('rejects invalid socket tokens and sends booking events only to the owner and admins', async (context) => {
   if (!testMongoUri) {
     context.skip('A local test MongoDB is required.');

@@ -7,9 +7,12 @@ const bcrypt = require('bcryptjs');
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
+const Booking = require('../../models/booking');
+const Room = require('../../models/room');
 const User = require('../../models/user');
 const authRoutes = require('../../routes/auth');
 const profileRoutes = require('../../routes/profile');
+const { getHotelDateValue } = require('../../utils/date');
 
 // Same safety rule as the booking tests: only run against a local MongoDB,
 // and always use a throwaway database named after this process.
@@ -43,6 +46,35 @@ let emailSequence = 0;
 function uniqueEmail(prefix = 'user') {
   emailSequence++;
   return `${prefix}-${process.pid}-${emailSequence}@example.test`;
+}
+
+function dateOffset(days) {
+  const date = new Date(`${getHotelDateValue()}T00:00:00.000Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+async function createBooking(guest, room, checkIn, checkOut, status) {
+  const nights = (
+    Date.parse(`${checkOut}T00:00:00.000Z`) - Date.parse(`${checkIn}T00:00:00.000Z`)
+  ) / 86_400_000;
+  return Booking.create({
+    guestId: guest.id,
+    guestName: `${guest.firstName} ${guest.lastName}`,
+    guestEmail: guest.email,
+    guestPhone: guest.phone,
+    roomId: room._id,
+    roomNumber: room.number,
+    roomType: room.type,
+    checkIn,
+    checkOut,
+    adults: 1,
+    children: 0,
+    travelingWithPets: false,
+    nightlyRate: room.nightlyRate,
+    total: room.nightlyRate * nights,
+    status,
+  });
 }
 
 function registrationBody(overrides = {}) {
@@ -298,4 +330,46 @@ test('deleting an account removes only the signed-in guest', async () => {
   assert.equal(await User.exists({ _id: first.user.id }), null);
   assert.ok(await User.exists({ _id: second.user.id }));
   assert.equal((await loginAs(first.body.email, first.body.password)).status, 401);
+});
+
+test('refuses account deletion with upcoming confirmed bookings and keeps past bookings', async () => {
+  const { body, user } = await registerGuest();
+  const token = (await (await loginAs(body.email, body.password)).json()).token;
+  const room = await Room.create({
+    number: `ACCOUNT-${process.pid}-${++emailSequence}`,
+    type: 'Superior King',
+    floor: 1,
+    description: 'Account deletion test room',
+    amenities: 'Wi-Fi',
+    capacity: 2,
+    nightlyRate: 200,
+    statusOverride: 'Automatic',
+  });
+  const upcomingBooking = await createBooking(
+    user,
+    room,
+    dateOffset(5),
+    dateOffset(7),
+    'Confirmed'
+  );
+  const pastBooking = await createBooking(
+    user,
+    room,
+    dateOffset(-5),
+    dateOffset(-3),
+    'Checked out'
+  );
+
+  const refused = await request('/api/profile/account', { method: 'DELETE', token });
+  assert.equal(refused.status, 409);
+  assert.deepEqual(await refused.json(), { message: 'Cancel your bookings first.' });
+  assert.ok(await User.exists({ _id: user.id }));
+  assert.ok(await Booking.exists({ _id: pastBooking._id }));
+
+  await Booking.updateOne({ _id: upcomingBooking._id }, { $set: { status: 'Cancelled' } });
+  const deleted = await request('/api/profile/account', { method: 'DELETE', token });
+  assert.equal(deleted.status, 204);
+  assert.equal(await User.exists({ _id: user.id }), null);
+  assert.equal(await Booking.countDocuments({ guestId: user.id }), 2);
+  assert.ok(await Booking.exists({ _id: pastBooking._id, status: 'Checked out' }));
 });

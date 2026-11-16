@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const Booking = require('../models/booking');
 const User = require('../models/user');
 const requireAuth = require('../middleware/require-auth');
+const { getHotelDateValue } = require('../utils/date');
 
 const router = express.Router();
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -139,6 +140,19 @@ router.put('/password', async (req, res, next) => {
 
 router.delete('/account', async (req, res, next) => {
   try {
+    const user = await User.findOne({ _id: req.auth.userId, role: 'guest' }).select('_id');
+    if (!user) {
+      return res.status(404).json({ message: 'Guest account not found.' });
+    }
+    const upcomingBooking = await Booking.exists({
+      guestId: user._id,
+      status: 'Confirmed',
+      checkOut: { $gt: getHotelDateValue() },
+    });
+    if (upcomingBooking) {
+      return res.status(409).json({ message: 'Cancel your bookings first.' });
+    }
+
     const result = await User.deleteOne({ _id: req.auth.userId, role: 'guest' });
     if (result.deletedCount === 0) {
       return res.status(404).json({ message: 'Guest account not found.' });

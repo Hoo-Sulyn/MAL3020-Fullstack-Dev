@@ -304,10 +304,23 @@ router.delete('/:id', requireAuth('admin'), async (req, res, next) => {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ message: 'Invalid room identifier.' });
     }
-    const room = await Room.findByIdAndDelete(req.params.id);
+    const room = await Room.findById(req.params.id).select('_id');
     if (!room) {
       return res.status(404).json({ message: 'Room not found.' });
     }
+    const activeBooking = await Booking.exists({
+      roomId: room._id,
+      $or: [
+        { status: 'Checked in' },
+        { status: 'Confirmed', checkOut: { $gt: getHotelDateValue() } },
+      ],
+    });
+    if (activeBooking) {
+      return res.status(409).json({
+        message: 'Cancel or complete its bookings first.',
+      });
+    }
+    await room.deleteOne();
     return res.status(204).end();
   } catch (error) {
     return next(error);
