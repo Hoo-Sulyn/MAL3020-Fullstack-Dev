@@ -6,6 +6,12 @@ services:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   backend:
     build: ./backend
@@ -15,8 +21,12 @@ services:
       MONGO_URI: mongodb://mongo:27017/hotel
     ports:
       - "3000:3000"
+    # Longer than the backend's drain delay (1 s) plus its request time limit (10 s),
+    # so Docker waits for a graceful shutdown instead of force-killing the container.
+    stop_grace_period: 15s
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
 
   frontend:
     build: ./frontend
@@ -24,7 +34,8 @@ services:
     ports:
       - "4200:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
 volumes:
   mongo-data:
