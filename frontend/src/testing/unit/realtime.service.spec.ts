@@ -23,7 +23,7 @@ describe('RealtimeService', () => {
   let service: RealtimeService;
 
   beforeEach(() => {
-    localStorage.clear();
+    sessionStorage.clear();
     socketMocks.listeners.clear();
     socketMocks.io.mockClear();
     socketMocks.socket.on.mockClear();
@@ -33,7 +33,7 @@ describe('RealtimeService', () => {
 
   afterEach(() => {
     service.disconnect();
-    localStorage.clear();
+    sessionStorage.clear();
   });
 
   it('stores the token and opens an authenticated WebSocket connection', async () => {

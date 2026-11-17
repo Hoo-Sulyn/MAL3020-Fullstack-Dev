@@ -15,7 +15,7 @@ export class RealtimeService {
   private isLoadingSocketClient = false;
 
   connect(token: string): void {
-    localStorage.setItem(this.tokenKey, token);
+    sessionStorage.setItem(this.tokenKey, token);
     this.socket?.disconnect();
     this.socket = null;
     this.openSocket();
@@ -50,13 +50,13 @@ export class RealtimeService {
   }
 
   disconnect(): void {
-    localStorage.removeItem(this.tokenKey);
+    sessionStorage.removeItem(this.tokenKey);
     this.socket?.disconnect();
     this.socket = null;
   }
 
   getToken(): string | null {
-    return localStorage.getItem(this.tokenKey);
+    return sessionStorage.getItem(this.tokenKey);
   }
 
   isConnected(): boolean {

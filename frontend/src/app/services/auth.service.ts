@@ -46,7 +46,7 @@ export class AuthService {
   login(email: string, password: string, role: AuthRole): Observable<AuthResponse> {
     return this.http
       .post<AuthResponse>(`${this.apiUrl}/login`, { email, password, role })
-      .pipe(tap((response) => localStorage.setItem(this.sessionKey, JSON.stringify(response))));
+      .pipe(tap((response) => sessionStorage.setItem(this.sessionKey, JSON.stringify(response))));
   }
 
   getProfile(): Observable<AuthUser> {
@@ -78,26 +78,26 @@ export class AuthService {
   }
 
   updateCachedUser(user: AuthUser): void {
-    const storedSession = localStorage.getItem(this.sessionKey);
+    const storedSession = sessionStorage.getItem(this.sessionKey);
     if (!storedSession) {
       return;
     }
 
     try {
       const session = JSON.parse(storedSession) as AuthResponse;
-      localStorage.setItem(this.sessionKey, JSON.stringify({ ...session, user }));
+      sessionStorage.setItem(this.sessionKey, JSON.stringify({ ...session, user }));
     } catch (error) {
       console.error('Unable to update saved user session:', error);
     }
   }
 
   logout(): void {
-    localStorage.removeItem(this.sessionKey);
+    sessionStorage.removeItem(this.sessionKey);
     this.realtime.disconnect();
   }
 
   getCurrentUser(): AuthUser | null {
-    const session = localStorage.getItem(this.sessionKey);
+    const session = sessionStorage.getItem(this.sessionKey);
     if (!session) {
       return null;
     }
@@ -108,6 +108,23 @@ export class AuthService {
     } catch (error) {
       console.error('Unable to read saved user session:', error);
       return null;
+    }
+  }
+
+  /** True when someone with the given role is signed in and their token has not expired. */
+  hasValidSession(role: AuthRole): boolean {
+    const user = this.getCurrentUser();
+    const token = this.realtime.getToken();
+    return Boolean(user && user.role === role && token && !this.isTokenExpired(token));
+  }
+
+  private isTokenExpired(token: string): boolean {
+    try {
+      const payload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const { exp } = JSON.parse(atob(payload)) as { exp?: number };
+      return typeof exp !== 'number' || exp * 1000 <= Date.now();
+    } catch {
+      return true;
     }
   }
 
