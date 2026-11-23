@@ -20,7 +20,8 @@
 }
 
 .room-detail{
-    padding: 5px 20px 15px 20px;
+    box-sizing: border-box;
+    padding: 5px clamp(14px, 3vw, 20px) 15px;
     background-color: white;
     border-radius: 0 0 12px 12px;
 }
@@ -41,7 +42,15 @@
 
 .bottom-row-details{
     display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     justify-content: space-between;
+    gap: 12px;
+}
+
+#room-pricing{
+    min-width: 0;
+    flex: 1 1 160px;
 }
 
 #price-container{
@@ -56,6 +65,7 @@
 }
 
 #view-details-btn{
+    box-sizing: border-box;
     background-color: #52634B;
     border: 1px solid transparent;
     border-radius: 8px;
@@ -69,4 +79,14 @@
 
 #view-details-btn:hover{
     background-color: #384732;
+}
+
+@media (max-width: 600px){
+    #view-details-container{
+        flex: 1 1 100%;
+    }
+
+    #view-details-btn{
+        width: 100%;
+    }
 }
