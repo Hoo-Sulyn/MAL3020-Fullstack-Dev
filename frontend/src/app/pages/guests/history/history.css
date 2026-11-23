@@ -1,5 +1,8 @@
 #history-container{
-    padding: 20px 50px;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    padding: 20px clamp(16px, 4vw, 50px);
     color: #252634;
 }
 
@@ -24,17 +27,21 @@
 
 .main-container{
     display: flex;
+    min-width: 0;
     gap: 30px;
 }
 
 #booking-history-container{
     display: flex;
     flex-direction: column;
+    min-width: 0;
     gap: 20px;
     flex: 3;
 }
 
 .booking-history-cards{
+    box-sizing: border-box;
+    min-width: 0;
     border: 1px solid #E2E5DD;
     border-radius: 12px;
     background-color: white;
@@ -47,20 +54,22 @@
 
 .booking-details-card{
     display: flex;
-    gap: 50px;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
     justify-content: space-between;
     margin: 20px 0;
 }
 
 .booking-details{
-    align-self: center;
-    width: 100%;
-    flex: 2;
+    flex: 1 1 150px;
+    min-width: 0;
 }
 
 .booking-details > p{
     font-size: 0.9rem;
     font-weight: bold;
+    overflow-wrap: anywhere;
 }
 
 #room-details{
@@ -124,13 +133,15 @@
 }
 
 #confirmation-container{
-    display: flex;  /* to show, change to flex */
+    display: flex;
     flex-direction: column;
-    flex: 1;
+    flex: 1 1 240px;
+    min-width: 0;
     gap: 20px;
 }
 
 .cancel-booking-container{
+    box-sizing: border-box;
     border: 1px solid #E2E5DD;
     border-radius: 12px;
     background-color: white;
@@ -217,4 +228,57 @@
     margin: 5px 0;
     color: #252634;
     font-size: 0.75rem;
+}
+
+@media (max-width: 960px){
+    #history-container{
+        padding: 18px 20px;
+    }
+
+    .main-container{
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    #booking-history-container,
+    #confirmation-container{
+        width: 100%;
+        flex: initial;
+    }
+
+    .booking-details-card{
+        gap: 14px;
+    }
+
+    .booking-details{
+        flex-basis: 180px;
+    }
+}
+
+@media (max-width: 550px){
+    #history-container{
+        padding: 16px;
+    }
+
+    .booking-history-cards,
+    .cancel-booking-container{
+        padding: 18px;
+    }
+
+    .booking-details-card{
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .booking-details{
+        width: 100%;
+        flex: initial;
+    }
+
+    .booking-details:last-child{
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 16px;
+    }
 }
