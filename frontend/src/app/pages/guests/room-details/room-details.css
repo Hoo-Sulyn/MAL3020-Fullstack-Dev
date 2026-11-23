@@ -1,9 +1,18 @@
 #room-details-container{
     display: flex;
     flex-direction: column;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
     min-height: 100vh;
     margin: 0;
-    padding: 20px 50px;
+    padding: 20px clamp(16px, 4vw, 50px);
+}
+
+.main-container{
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
 }
 
 #back-to-rooms{
@@ -24,33 +33,42 @@
 
 .room-details-form{
     display: flex;
+    min-width: 0;
     gap: 40px;
 }
 
 #room-details{
     flex: 2;
+    min-width: 0;
 }
 
 #room-image{
-    min-width: 400px;
+    width: 100%;
+    min-width: 0;
     height: 350px;
     margin: 20px 0;
 }
 
 #room-image img{
+    display: block;
+    box-sizing: border-box;
     border-radius: 12px;
     width: 100%;
     height: 100%;
+    object-fit: cover;
 }
 
 #room-form{
-    flex: 1;
+    box-sizing: border-box;
+    flex: 1 1 280px;
+    min-width: 0;
     height: fit-content;
     align-self: center;
 }
 
 #room-amenities-container{
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     gap: 10px;
     margin: 25px 0;
@@ -304,7 +322,9 @@
 
 #total-nights-price{
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
+    gap: 8px;
     margin: 20px 5px;
 }
 
@@ -347,23 +367,48 @@
     background-color: #374432;
 }
 
-@media (max-width: 700px){
-
-    .main-container{
-        padding: 20px;
+@media (max-width: 960px){
+    #room-details-container{
+        padding: 16px;
     }
 
     .room-details-form{
         flex-direction: column;
+        gap: 20px;
+    }
+
+    #room-details,
+    #room-form{
+        box-sizing: border-box;
+        width: 100%;
+        flex: initial;
     }
 
     #room-image{
+        width: 100%;
         min-width: 0;
-        height: 260px;
+        height: clamp(200px, 55vw, 350px);
+    }
+
+    #room-form{
+        align-self: stretch;
     }
 
     #dropdown-contents{
-        padding: 20px;
+        left: auto;
+        right: 0;
+        width: min(420px, calc(100vw - 48px));
+        padding: 18px;
+    }
+}
+
+@media (max-width: 420px){
+    #room-form{
+        padding: 16px;
     }
 
+    #total-nights-price{
+        margin-right: 0;
+        margin-left: 0;
+    }
 }

@@ -97,8 +97,8 @@ header{
     .nav{
         order: 1;
         flex: 1 1 100%;
-        justify-content: flex-start;
-        gap: 12px;
+        justify-content: space-evenly;
+        gap: 0;
         min-width: 0;
         overflow-x: auto;
     }
@@ -107,6 +107,7 @@ header{
         flex: 0 0 auto;
         padding: 12px 4px;
         white-space: nowrap;
+        text-align: center;
     }
 
     .currency-user{

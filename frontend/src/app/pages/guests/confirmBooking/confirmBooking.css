@@ -1,12 +1,18 @@
 #confirm-booking-container{
     display: flex;
     flex-direction: column;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
     min-height: 100vh;
     gap: 20px;
 }
 
 .main-container{
-    padding: 20px 50px;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    padding: 20px clamp(16px, 4vw, 50px);
     margin-bottom: 40px;
 }
 
@@ -38,17 +44,23 @@
 
 #forms-container{
     display: flex;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    align-items: flex-start;
     gap: 40px;
 }
 
 #stay-guest-details-container{
     display: flex;
     flex-direction: column;
+    min-width: 0;
     gap: 20px;
     flex: 3;
 }
 
 #stay-details{
+    box-sizing: border-box;
     border: 1px solid #E2E5DD;
     border-radius: 12px;
     padding: 25px;
@@ -61,6 +73,7 @@
 
 #stay-details-form{
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     gap: 20px;
 }
@@ -71,9 +84,10 @@
 }
 
 .stay-fields{
-    flex: 1;
+    flex: 1 1 180px;
     display: flex;
     flex-direction: column;
+    min-width: 0;
     gap: 10px;
 }
 
@@ -261,6 +275,7 @@
 }
 
 #guest-details{
+    box-sizing: border-box;
     border: 1px solid #E2E5DD;
     border-radius: 12px;
     padding: 25px;
@@ -269,12 +284,15 @@
 
 #guest-detail-info{
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
+    gap: 12px;
 }
 
 #guest-name-email-number{
     display: flex;
     flex-direction: column;
+    min-width: 0;
     gap: 10px;
 }
 
@@ -286,6 +304,7 @@
 #guest-email-number{
     color: #74796F;
     font-size: 0.85rem;
+    overflow-wrap: anywhere;
 }
 
 #edit-profile-link{
@@ -320,11 +339,13 @@
 }
 
 #booking-summary-container{
+    box-sizing: border-box;
     border: 1px solid #E2E5DD;
     border-radius: 12px;
     padding: 25px;
     background-color: white;
-    flex: 1;
+    flex: 1 1 240px;
+    min-width: 0;
     height: fit-content;
     align-self: center;
 }
@@ -365,6 +386,8 @@
     font-weight: bold;
     font-size: 0.95rem;
     margin: 10px 0;
+    text-align: right;
+    overflow-wrap: anywhere;
 }
 
 #total-cost-desc{
@@ -381,6 +404,7 @@
 }
 
 #confirm-booking-btn{
+    box-sizing: border-box;
     width: 100%;
     margin-top: 20px;
     padding: 11px 16px;
@@ -413,10 +437,49 @@
     }
 
     .main-container{
-        padding: 20px;
+        padding: 16px;
     }
 
     #dropdown-contents{
-        padding: 20px;
+        right: 0;
+        left: auto;
+        width: min(420px, calc(100vw - 48px), 100%);
+        padding: 18px;
+    }
+}
+
+@media (max-width: 960px){
+    #forms-container{
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    #stay-guest-details-container,
+    #booking-summary-container{
+        width: 100%;
+        flex: initial;
+    }
+
+    #booking-summary-container{
+        align-self: stretch;
+    }
+
+    #dropdown-contents{
+        right: 0;
+        left: auto;
+        width: min(420px, calc(100vw - 48px), 100%);
+        padding: 18px;
+    }
+}
+
+@media (max-width: 420px){
+    #stay-details,
+    #guest-details,
+    #booking-summary-container{
+        padding: 18px;
+    }
+
+    .stay-fields{
+        flex-basis: 100%;
     }
 }
