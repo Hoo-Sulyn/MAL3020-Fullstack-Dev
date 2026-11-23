@@ -9,7 +9,7 @@ header{
 
 .nav{
     display: flex;
-    gap: 20%;
+    gap: 20px;
     justify-content: center;
 }
 
@@ -88,4 +88,43 @@ header{
 
 #sign-out-btn:hover{
     background-color: #E2E5DD;
+}
+
+@media (max-width: 900px){
+    header{
+        flex-wrap: wrap;
+        gap: 0 12px;
+        padding: 0 16px;
+    }
+
+    header > img{
+        max-width: 45vw;
+        height: auto;
+    }
+
+    .nav{
+        order: 1;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        flex: 1 1 100%;
+        gap: 4px;
+        min-width: 0;
+    }
+
+    .nav a{
+        padding: 10px 4px;
+        text-align: center;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .currency-user{
+        gap: 10px;
+        margin-left: auto;
+    }
+
+    #user-sign-out{
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
 }

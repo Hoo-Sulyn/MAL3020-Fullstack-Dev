@@ -1,5 +1,8 @@
 .booking-management-container {
-    padding: 20px 50px;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    padding: 20px clamp(16px, 4vw, 50px);
     color: #252634;
 }
 
@@ -37,6 +40,7 @@
     display: grid;
     grid-template-columns: minmax(0, 2.1fr) minmax(250px, 0.95fr);
     align-items: start;
+    min-width: 0;
     gap: 20px;
     margin-top: 20px;
 }
@@ -56,6 +60,8 @@
 
 .booking-list-toolbar {
     display: flex;
+    box-sizing: border-box;
+    min-width: 0;
     align-items: center;
     gap: 20px;
     padding: 20px;
@@ -97,6 +103,7 @@
 .filter-container {
     position: relative;
     flex: 0 0 auto;
+    min-width: 0;
 }
 
 .filter-button {
@@ -397,6 +404,7 @@
 .booking-details-column {
     display: flex;
     flex-direction: column;
+    min-width: 0;
     gap: 12px;
 }
 
@@ -469,6 +477,7 @@
     margin: 0;
     color: #3d403b;
     text-align: right;
+    overflow-wrap: anywhere;
 }
 
 .booking-detail-list .detail-total {
@@ -543,6 +552,7 @@
 
 .cancel-confirmation-actions {
     display: flex;
+    flex-wrap: wrap;
     justify-content: flex-end;
     gap: 8px;
     margin-top: 12px;
@@ -558,7 +568,7 @@
     background: #8e443d;
 }
 
-@media (max-width: 850px) {
+@media (max-width: 900px) {
     .booking-management-layout {
         grid-template-columns: minmax(0, 1fr);
     }
@@ -572,7 +582,7 @@
 
 @media (max-width: 650px) {
     .booking-management-container {
-        padding: 18px 14px 30px;
+        padding: 16px;
     }
 
     .booking-list-toolbar {
@@ -586,11 +596,12 @@
     }
 
     .filter-container {
-        flex: 1 1 auto;
+        flex: 1 1 100%;
     }
 
     .filter-button {
         width: 100%;
+        min-width: 0;
     }
 
     .booking-tabs {
@@ -606,5 +617,30 @@
     .pagination-controls {
         width: 100%;
         justify-content: space-between;
+    }
+
+    .booking-detail-card,
+    .cancel-confirmation {
+        padding: 16px;
+    }
+
+    .booking-detail-list > div {
+        align-items: flex-start;
+    }
+
+    .booking-detail-list dt {
+        min-width: 76px;
+    }
+
+    .booking-detail-list dd {
+        min-width: 0;
+    }
+
+    .cancel-confirmation-actions {
+        justify-content: stretch;
+    }
+
+    .cancel-confirmation-actions button {
+        flex: 1 1 130px;
     }
 }

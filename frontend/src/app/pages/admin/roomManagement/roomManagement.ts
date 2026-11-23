@@ -40,6 +40,7 @@ export class RoomManagement implements OnInit {
   statusFilterDropdownOpen = false;
   selectedStatus = 'All statuses';
   roomStatusDropdownOpen: string | null = null;
+  roomStatusMenuPosition: { top: number; left: number } | null = null;
   searchQuery = '';
   rooms: Room[] = [];
   showAddRoom = false;
@@ -108,12 +109,36 @@ export class RoomManagement implements OnInit {
     this.statusFilterDropdownOpen = false;
   }
 
-  toggleRoomStatusDropdown(roomNumber: string): void {
-    this.roomStatusDropdownOpen = this.roomStatusDropdownOpen === roomNumber ? null : roomNumber;
+  toggleRoomStatusDropdown(roomNumber: string, event: MouseEvent): void {
+    if (this.roomStatusDropdownOpen === roomNumber) {
+      this.roomStatusDropdownOpen = null;
+      this.roomStatusMenuPosition = null;
+      return;
+    }
+
+    const trigger = event.currentTarget;
+    if (!(trigger instanceof HTMLElement)) {
+      return;
+    }
+
+    const rect = trigger.getBoundingClientRect();
+    const menuWidth = 180;
+    const menuHeight = 170;
+    const viewportWidth = document.documentElement.clientWidth;
+    const top =
+      rect.top >= menuHeight + 8
+        ? rect.top - menuHeight - 6
+        : Math.min(rect.bottom + 6, window.innerHeight - menuHeight - 8);
+    this.roomStatusMenuPosition = {
+      top: Math.max(8, top),
+      left: Math.max(8, Math.min(rect.left, viewportWidth - menuWidth - 8)),
+    };
+    this.roomStatusDropdownOpen = roomNumber;
   }
 
   selectRoomStatus(room: Room, status: RoomStatusOverride): void {
     this.roomStatusDropdownOpen = null;
+    this.roomStatusMenuPosition = null;
     this.pageError = '';
     this.roomService.updateRoomStatus(room.id, status).subscribe({
       next: (updatedRoom) => {
@@ -243,6 +268,13 @@ export class RoomManagement implements OnInit {
   closeDropdowns(): void {
     this.statusFilterDropdownOpen = false;
     this.roomStatusDropdownOpen = null;
+    this.roomStatusMenuPosition = null;
+  }
+
+  @HostListener('window:scroll')
+  closeRoomStatusDropdown(): void {
+    this.roomStatusDropdownOpen = null;
+    this.roomStatusMenuPosition = null;
   }
 
   private loadRooms(): void {

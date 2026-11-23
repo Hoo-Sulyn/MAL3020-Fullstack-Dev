@@ -69,28 +69,29 @@
           </div>
         </div>
 
-        <table id="room-list-table">
-          <colgroup>
-            <col class="room-column" />
-            <col class="type-column" />
-            <col class="details-column" />
-            <col class="capacity-column" />
-            <col class="nightly-column" />
-            <col class="status-column" />
-            <col class="actions-column" />
-          </colgroup>
-          <thead>
-            <tr id="room-list-header">
-              <th>Room</th>
-              <th>Type</th>
-              <th>Details</th>
-              <th>Capacity</th>
-              <th>Nightly</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+        <div class="room-table-scroll" (scroll)="closeRoomStatusDropdown()">
+          <table id="room-list-table">
+            <colgroup>
+              <col class="room-column" />
+              <col class="type-column" />
+              <col class="details-column" />
+              <col class="capacity-column" />
+              <col class="nightly-column" />
+              <col class="status-column" />
+              <col class="actions-column" />
+            </colgroup>
+            <thead>
+              <tr id="room-list-header">
+                <th>Room</th>
+                <th>Type</th>
+                <th>Details</th>
+                <th>Capacity</th>
+                <th>Nightly</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
             @for (room of filteredRooms; track room) {
               <tr class="room-list-contents">
                 <td class="room-num">{{ room.number }}</td>
@@ -129,7 +130,7 @@
                       [attr.aria-expanded]="roomStatusDropdownOpen === room.number"
                       aria-haspopup="listbox"
                       [attr.aria-label]="'Set status for room ' + room.number"
-                      (click)="toggleRoomStatusDropdown(room.number)"
+                      (click)="toggleRoomStatusDropdown(room.number, $event)"
                     >
                       Set status <span aria-hidden="true">▾</span>
                     </button>
@@ -138,6 +139,9 @@
                         class="table-status-options"
                         role="listbox"
                         [attr.aria-label]="'Status for room ' + room.number"
+                        [style.top.px]="roomStatusMenuPosition?.top"
+                        [style.left.px]="roomStatusMenuPosition?.left"
+                        (click)="$event.stopPropagation()"
                       >
                         @for (status of statusOptions; track status) {
                           <button
@@ -171,8 +175,9 @@
                 <td colspan="7">No rooms match the selected filters.</td>
               </tr>
             }
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
         <div class="tfoot">
           <div id="count-rooms-page">
             <small id="count-rooms">{{ filteredRooms.length }} of {{ rooms.length }} rooms</small>
