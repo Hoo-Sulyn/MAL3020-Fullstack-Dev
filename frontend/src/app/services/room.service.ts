@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { RealtimeService } from './realtime.service';
+import { API_ORIGIN } from '../api.config';
 
 export type RoomStatus = 'Available' | 'Occupied' | 'Maintenance';
 export type RoomStatusOverride = RoomStatus | 'Automatic';
@@ -57,7 +58,7 @@ export class RoomService {
   private readonly http = inject(HttpClient);
   private readonly realtime = inject(RealtimeService);
 
-  private readonly apiUrl = 'http://localhost:3000/api';
+  private readonly apiUrl = `${API_ORIGIN}/api`;
 
   getRooms(checkIn?: string, checkOut?: string, adults = 1): Observable<Room[]> {
     let params = new HttpParams();

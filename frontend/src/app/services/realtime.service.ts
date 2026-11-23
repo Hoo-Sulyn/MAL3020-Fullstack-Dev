@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import type { Socket } from 'socket.io-client';
+import { API_ORIGIN } from '../api.config';
 
 export interface BookingChangeEvent {
   action: 'created' | 'updated';
@@ -33,7 +34,7 @@ export class RealtimeService {
         return;
       }
 
-      this.socket = io('http://localhost:3000', {
+      this.socket = io(API_ORIGIN, {
         transports: ['websocket'],
         auth: (callback) => callback({ token: this.getToken() }),
       });

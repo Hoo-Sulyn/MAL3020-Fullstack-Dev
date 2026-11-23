@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { RealtimeService } from './realtime.service';
+import { API_ORIGIN } from '../api.config';
 
 export type AuthRole = 'guest' | 'admin';
 
@@ -29,8 +30,8 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly realtime = inject(RealtimeService);
 
-  private readonly apiUrl = 'http://localhost:3000/api/auth';
-  private readonly profileUrl = 'http://localhost:3000/api/profile';
+  private readonly apiUrl = `${API_ORIGIN}/api/auth`;
+  private readonly profileUrl = `${API_ORIGIN}/api/profile`;
   private readonly sessionKey = 'haven_session';
 
   register(payload: {

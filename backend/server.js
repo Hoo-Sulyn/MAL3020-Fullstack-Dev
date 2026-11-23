@@ -3,6 +3,7 @@ const http = require('node:http');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const { corsOrigin } = require('./middleware/allowed-origins');
 const authRoutes = require('./routes/auth');
 const profileRoutes = require('./routes/profile');
 const roomRoutes = require('./routes/rooms');
@@ -22,7 +23,7 @@ const shutdown = createGracefulShutdown({
   drainDelayMs: Number(process.env.SHUTDOWN_DELAY_MS ?? 1000),
 });
 app.use(shutdown.trackRequests);
-app.use(cors({ origin: 'http://localhost:4200' }));
+app.use(cors({ origin: corsOrigin }));
 app.use(express.json());
 
 app.get('/', (req, res) => res.send('API is running'));
