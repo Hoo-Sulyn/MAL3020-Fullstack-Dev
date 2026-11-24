@@ -468,6 +468,10 @@ tr{
     gap: 15px;
 }
 
+#edit-room-form > .form-column{
+    flex: 0 1 auto;
+}
+
 #edit-room-container #edit-room-form input{
     font-size: 0.9rem;
 }
