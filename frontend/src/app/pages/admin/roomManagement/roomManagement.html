@@ -141,7 +141,6 @@
                         [attr.aria-label]="'Status for room ' + room.number"
                         [style.top.px]="roomStatusMenuPosition?.top"
                         [style.left.px]="roomStatusMenuPosition?.left"
-                        (click)="$event.stopPropagation()"
                       >
                         @for (status of statusOptions; track status) {
                           <button
