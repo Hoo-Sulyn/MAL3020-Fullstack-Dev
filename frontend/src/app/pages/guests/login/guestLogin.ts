@@ -23,6 +23,7 @@ export class GuestLogin {
   errorMessage = signal('');
   showRegisterPrompt = signal(false);
   isSubmitting = signal(false);
+  showPassword = false;
 
   constructor() {
     this.loginForm = this.fb.group({

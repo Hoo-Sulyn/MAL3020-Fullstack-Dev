@@ -41,6 +41,9 @@ export class Profile implements OnInit {
   isChangingPassword = false;
   isDeletingAccount = false;
   showDeleteConfirmation = false;
+  showCurrentPassword = false;
+  showNewPassword = false;
+  showConfirmPassword = false;
   errorMessage = '';
   successMessage = '';
 

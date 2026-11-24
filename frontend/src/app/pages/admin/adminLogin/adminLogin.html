@@ -38,17 +38,47 @@
         <!-- Password -->
         <div class="form-group">
           <label for="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            formControlName="password"
-            placeholder="Enter password"
-            autocomplete="current-password"
-            (input)="clearError()"
-            [attr.aria-invalid]="
-              loginForm.get('password')?.touched && loginForm.get('password')?.invalid
-            "
-          />
+          <div class="password-input-wrapper">
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              id="password"
+              formControlName="password"
+              placeholder="Enter password"
+              autocomplete="current-password"
+              (input)="clearError()"
+              [attr.aria-invalid]="
+                loginForm.get('password')?.touched && loginForm.get('password')?.invalid
+              "
+            />
+            <button
+              class="password-toggle"
+              type="button"
+              [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+              [attr.aria-pressed]="showPassword"
+              (click)="showPassword = !showPassword"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path
+                  d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.8"
+                />
+                <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8" />
+                @if (showPassword) {
+                  <path
+                    d="m3 3 18 18"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-width="1.8"
+                  />
+                }
+              </svg>
+            </button>
+          </div>
           @if (
             loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required')
           ) {

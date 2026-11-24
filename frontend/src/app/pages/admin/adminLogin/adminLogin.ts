@@ -23,6 +23,7 @@ export class AdminLogin {
 
   errorMessage = signal('');
   isSubmitting = signal(false);
+  showPassword = false;
 
   constructor() {
     this.loginForm = this.fb.group({

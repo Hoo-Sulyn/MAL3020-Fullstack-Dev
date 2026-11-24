@@ -86,6 +86,47 @@ form{
     padding: 15px;
 }
 
+.password-input-wrapper{
+    position: relative;
+}
+
+.password-input-wrapper input{
+    padding-right: 48px;
+}
+
+.password-toggle{
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+    margin: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: #52634B;
+    cursor: pointer;
+    transform: translateY(-50%);
+}
+
+.password-toggle:hover{
+    border: 0;
+    background: #f1f3ef;
+}
+
+.password-toggle:focus-visible{
+    outline: 2px solid #52634B;
+    outline-offset: 1px;
+}
+
+.password-toggle svg{
+    width: 20px;
+    height: 20px;
+}
+
 .hint{
     color: #74796F;
     display: none;

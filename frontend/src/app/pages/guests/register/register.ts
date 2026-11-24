@@ -39,6 +39,8 @@ export class GuestRegister {
   errorMessage = '';
   successMessage = '';
   isSubmitting = false;
+  showPassword = false;
+  showConfirmPassword = false;
 
   constructor() {
     this.registerForm = this.fb.group(
