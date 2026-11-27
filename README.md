@@ -52,6 +52,15 @@ Node.js 22+ is only needed if you want to run the tests or linting outside Docke
 - **Guest:** register a new account on the sign-up page, then search for rooms and book.
 - Admin and guest can be logged in at the same time in different tabs. Admin pages update live when a guest books.
 
+### Demo accounts
+
+| Role | Email | Password |
+| --- | --- | --- |
+| Admin | `havenAdmin@haven.com` | havenAdmin123
+| Guest | `johndoe@gmail.com` | johndoe123 |
+| Guest | `janedoe@gmail.com` | janedoe123 |
+
+
 ## Stopping and restarting
 
 ```bash
